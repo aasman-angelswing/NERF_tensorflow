@@ -74,7 +74,7 @@ class TrainMonitor(Callback):
 		plt.savefig(f"{imagePath}/{epoch:03d}.png")
 		plt.close()
 
-# instantiate a train monitor callback
-trainMonitor = TrainMonitor()
-# return the train monitor
-return trainMonitor
+		# instantiate a train monitor callback
+		trainMonitor = TrainMonitor()
+		# return the train monitor
+		return trainMonitor
