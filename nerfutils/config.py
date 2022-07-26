@@ -11,17 +11,19 @@ L_DIR = 4
 N_F = 32
 N_C = 32
 
-IMAGE_PATH = "/home/aasman/angelswing/NERF_tensorflow/output/image"
-VIDEO_PATH = "/home/aasman/angelswing/NERF_tensorflow/output/image"
-OUTPUT_VIDEO_PATH = "/home/aasman/angelswing/NERF_tensorflow/output/image"
+main_dir = "/content/NERF_tensorflow"
+
+IMAGE_PATH = main_dir + "/output/image"
+VIDEO_PATH = main_dir + "/output/image"
+OUTPUT_VIDEO_PATH = main_dir + "/output/image"
 
 FPS = 30
 QUALITY = 7
 
-TRAIN_JSON = "/home/aasman/angelswing/NERF_tensorflow/dataset/transforms_train.json"
-VAL_JSON = "/home/aasman/angelswing/NERF_tensorflow/dataset/transforms_val.json"
-TEST_JSON = "/home/aasman/angelswing/NERF_tensorflow/dataset/transforms_test.json"
-DATASET_PATH = "/home/aasman/angelswing/NERF_tensorflow/dataset"
+TRAIN_JSON = main_dir + "/NERF_tensorflow/dataset/transforms_train.json"
+VAL_JSON = main_dir + "/NERF_tensorflow/dataset/transforms_val.json"
+TEST_JSON = main_dir + "/NERF_tensorflow/dataset/transforms_test.json"
+DATASET_PATH = main_dir + "/NERF_tensorflow/dataset"
 
 NEAR = 2
 FAR = 6
@@ -36,5 +38,5 @@ STEPS_PER_EPOCH = 80
 VALIDATION_STEPS = 2
 EPOCHS = 10
 
-COARSE_PATH = "/home/aasman/angelswing/NERF_tensorflow/output"
-FINE_PATH = "/home/aasman/angelswing/NERF_tensorflow/output"
+COARSE_PATH = main_dir + "/NERF_tensorflow/output"
+FINE_PATH = main_dir + "/NERF_tensorflow/output"
