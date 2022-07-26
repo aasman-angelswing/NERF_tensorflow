@@ -1,12 +1,12 @@
 import tensorflow as tf
-
+from nerfutils import config
 
 def render_image_depth(rgb, sigma, tVals):
     # squeeze the last dimension of sigma
     sigma = sigma[..., 0]
     # calculate the delta between adjacent tVals
     delta = tVals[..., 1:] - tVals[..., :-1]
-    deltaShape = [BATCH_SIZE, IMAGE_HEIGHT, IMAGE_WIDTH, 1]
+    deltaShape = [config.BATCH_SIZE, config.IMAGE_HEIGHT, config.IMAGE_WIDTH, 1]
     delta = tf.concat(
         [delta, tf.broadcast_to([1e10], shape=deltaShape)], axis=-1)
     # calculate alpha from sigma and delta values
@@ -37,7 +37,7 @@ def sample_pdf(tValsMid, weights, nF):
     # start the cdf with 0s
     cdf = tf.concat([tf.zeros_like(cdf[..., :1]), cdf], axis=-1)
     # get the sample points
-    uShape = [BATCH_SIZE, IMAGE_HEIGHT, IMAGE_WIDTH, nF]
+    uShape = [config.BATCH_SIZE, config.IMAGE_HEIGHT, config.IMAGE_WIDTH, nF]
     u = tf.random.uniform(shape=uShape)
     # get the indices of the points of u when u is inserted into cdf in a
     # sorted manner

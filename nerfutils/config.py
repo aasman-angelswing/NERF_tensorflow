@@ -1,17 +1,17 @@
 import tensorflow as tf
 
-SAMPLE_THETA_POINTS = 12
+SAMPLE_THETA_POINTS = 10
 
-IMAGE_WIDTH = 800
-IMAGE_HEIGHT = 800
+IMAGE_WIDTH = 200
+IMAGE_HEIGHT = 200
 AUTO = tf.data.AUTOTUNE
 
 L_XYZ = 4
 L_DIR = 4
-N_F = 32
-N_C = 32
+N_F = 16
+N_C = 16
 
-main_dir = "/content/NERF_tensorflow"
+main_dir = "C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow"
 
 IMAGE_PATH = main_dir + "/output/image"
 VIDEO_PATH = main_dir + "/output/image"
@@ -28,13 +28,13 @@ DATASET_PATH = main_dir + "/dataset"
 NEAR = 2
 FAR = 6
 SKIP_LAYER = 5
-DENSE_UNITS = 256
+DENSE_UNITS = 64
 
-BATCH_SIZE = 5
+BATCH_SIZE = 2
 NUM_SAMPLES = 32
 POS_ENCODE_DIMS = 16
 
-STEPS_PER_EPOCH = 80
+STEPS_PER_EPOCH =  80
 VALIDATION_STEPS = 2
 EPOCHS = 10
 
