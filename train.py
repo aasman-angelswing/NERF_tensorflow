@@ -9,7 +9,7 @@ from nerfutils.train_monitor import get_train_monitor
 from nerfutils.nerf_trainer import Nerf_Trainer
 from nerfutils.nerf import get_model
 from nerfutils.encoder import encoder_fn
-from nerfutils.utils import get_focal_from_fov, render_image_depth, sample_pdf
+from nerfutils.utils import render_image_depth, sample_pdf
 from nerfutils.data import GetRays
 from nerfutils.data import GetImages
 from nerfutils.data import get_image_c2w
@@ -23,9 +23,7 @@ print("[INFO] grabbing the data from json files...")
 jsonTrainData = read_json(config.TRAIN_JSON)
 jsonValData = read_json(config.VAL_JSON)
 jsonTestData = read_json(config.TEST_JSON)
-focalLength = get_focal_from_fov(
-    fieldOfView=jsonTrainData["camera_angle_x"],
-    width=config.IMAGE_WIDTH)
+focalLength = 22
 # print the focal length of the camera
 print(f"[INFO] focal length of the camera: {focalLength}...")
 
