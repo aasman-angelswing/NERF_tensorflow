@@ -103,7 +103,11 @@ class GetRays:
         noiseShape = list(rayO.shape[:-1]) + [self.nC]
         noise = (tf.random.uniform(shape=noiseShape) *
                  (self.far - self.near) / self.nC)
+<<<<<<< HEAD
         tVals= tf.cast(tVals, tf.float32)
+=======
+        tVals = tf.cast(tVals, tf.float32)
+>>>>>>> 3a4ea9aea01dd7fce273926f6f0745b59f591d61
         tVals = tVals + noise
         # return ray origin, direction, and the sample points
         return (rayO, rayD, tVals)

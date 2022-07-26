@@ -1,5 +1,9 @@
 import tensorflow as tf
 from nerfutils import config
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3a4ea9aea01dd7fce273926f6f0745b59f591d61
 
 def render_image_depth(rgb, sigma, tVals):
     # squeeze the last dimension of sigma
