@@ -1,10 +1,10 @@
 # import the necessary packages
+import tensorflow as tf
 from tensorflow.io import read_file
 from tensorflow.image import decode_jpeg
 from tensorflow.image import convert_image_dtype
 from tensorflow.image import resize
 from tensorflow import reshape
-import tensorflow as tf
 import json
 
 
@@ -103,11 +103,8 @@ class GetRays:
         noiseShape = list(rayO.shape[:-1]) + [self.nC]
         noise = (tf.random.uniform(shape=noiseShape) *
                  (self.far - self.near) / self.nC)
-<<<<<<< HEAD
-        tVals= tf.cast(tVals, tf.float32)
-=======
         tVals = tf.cast(tVals, tf.float32)
->>>>>>> 3a4ea9aea01dd7fce273926f6f0745b59f591d61
+        tVals = tf.cast(tVals, tf.float32)
         tVals = tVals + noise
         # return ray origin, direction, and the sample points
         return (rayO, rayD, tVals)

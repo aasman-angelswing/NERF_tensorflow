@@ -8,8 +8,8 @@ AUTO = tf.data.AUTOTUNE
 
 L_XYZ = 4
 L_DIR = 4
-N_F = 16
-N_C = 16
+N_F = 8
+N_C = 8
 
 main_dir = "C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow"
 
@@ -34,7 +34,7 @@ BATCH_SIZE = 2
 NUM_SAMPLES = 32
 POS_ENCODE_DIMS = 16
 
-STEPS_PER_EPOCH =  80
+STEPS_PER_EPOCH =  50
 VALIDATION_STEPS = 2
 EPOCHS = 10
 

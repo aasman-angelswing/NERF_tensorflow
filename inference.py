@@ -71,7 +71,7 @@ for element in tqdm(ds):
     tValsCoarseMid = (0.5 *
                       (tValsCoarse[..., 1:] + tValsCoarse[..., :-1]))
     # apply hierarchical sampling and get the t vals for the fine
-    # model
+    # model 
     tValsFine = sample_pdf(tValsMid=tValsCoarseMid,
                            weights=weightsCoarse, nF=config.N_F)
     tValsFine = tf.sort(

@@ -128,7 +128,7 @@ trainMonitorCallback = get_train_monitor(testDs=testDs,
 print("[INFO] training the nerf model...")
 nerfTrainerModel.fit(trainDs, steps_per_epoch=config.STEPS_PER_EPOCH,
                      validation_data=valDs, validation_steps=config.VALIDATION_STEPS,
-                     epochs=config.EPOCHS, callbacks=trainMonitorCallback,
+                     epochs=config.EPOCHS
                      )
 # save the coarse and fine model
 nerfTrainerModel.coarseModel.save(config.COARSE_PATH)

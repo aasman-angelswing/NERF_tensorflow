@@ -1,10 +1,5 @@
 import tensorflow as tf
 from nerfutils import config
-<<<<<<< HEAD
-=======
-
->>>>>>> 3a4ea9aea01dd7fce273926f6f0745b59f591d61
-
 def render_image_depth(rgb, sigma, tVals):
     # squeeze the last dimension of sigma
     sigma = sigma[..., 0]
@@ -22,15 +17,11 @@ def render_image_depth(rgb, sigma, tVals):
     transmittance = tf.math.cumprod(expTerm + epsilon, axis=-1,
                                     exclusive=True)
     weights = alpha * transmittance
-
     # build the image and depth map from the points of the rays
     image = tf.reduce_sum(weights[..., None] * rgb, axis=-2)
     depth = tf.reduce_sum(weights * tVals, axis=-1)
-
     # return rgb, depth map and weights
     return (image, depth, weights)
-
-
 def sample_pdf(tValsMid, weights, nF):
     # add a small value to the weights to prevent it from nan
     weights += 1e-5
@@ -50,11 +41,11 @@ def sample_pdf(tValsMid, weights, nF):
     below = tf.maximum(0, indices-1)
     above = tf.minimum(cdf.shape[-1]-1, indices)
     indicesG = tf.stack([below, above], axis=-1)
-
     # gather the cdf according to the indices
     cdfG = tf.gather(cdf, indicesG, axis=-1,
                      batch_dims=len(indicesG.shape)-2)
-
+    tValsMid = tf.concat([tf.zeros_like(tValsMid[..., :1]), tValsMid], axis=-1)
+    tValsMid = tf.concat([tf.zeros_like(tValsMid[..., :1]), tValsMid], axis=-1)
     # gather the tVals according to the indices
     tValsMidG = tf.gather(tValsMid, indicesG, axis=-1,
                           batch_dims=len(indicesG.shape)-2)
@@ -64,6 +55,5 @@ def sample_pdf(tValsMid, weights, nF):
     t = (u - cdfG[..., 0]) / denom
     samples = (tValsMidG[..., 0] + t *
                (tValsMidG[..., 1] - tValsMidG[..., 0]))
-
     # return the samples
     return samples
