@@ -2,7 +2,6 @@
 from nerfutils import config
 from nerfutils.utils import pose_spherical
 from nerfutils.data import GetRays
-from nerfutils.utils import get_focal_from_fov
 from nerfutils.data import read_json
 from nerfutils.encoder import encoder_fn
 from nerfutils.utils import render_image_depth
@@ -14,6 +13,8 @@ import numpy as np
 import imageio
 import os
 
+
+os.chmod('C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow/output/image', 755)
 # create a camera2world matrix list to store the novel view
 # camera2world matrices
 c2wList = []
@@ -28,9 +29,7 @@ for theta in np.linspace(0.0, 360.0, config.SAMPLE_THETA_POINTS,
 # get the train validation and test data
 print("[INFO] grabbing the data from json files...")
 jsonTrainData = read_json(config.TRAIN_JSON)
-focalLength = get_focal_from_fov(
-    fieldOfView=jsonTrainData["camera_angle_x"],
-    width=config.IMAGE_WIDTH)
+focalLength = 22
 # instantiate the GetRays object
 getRays = GetRays(focalLength=focalLength, imageWidth=config.IMAGE_WIDTH,
                   imageHeight=config.IMAGE_HEIGHT, near=config.NEAR, far=config.FAR,
@@ -102,5 +101,4 @@ if not os.path.exists(config.VIDEO_PATH):
     os.makedirs(config.VIDEO_PATH)
 # build the video from the frames and save it to disk
 print("[INFO] creating the video from the frames...")
-imageio.mimwrite(config.OUTPUT_VIDEO_PATH, frameList, fps=config.FPS,
-                 quality=config.QUALITY, macro_block_size=config.MACRO_BLOCK_SIZE)
+imageio.mimwrite(config.OUTPUT_VIDEO_PATH, frameList, fps=config.FPS,format ="gif")
