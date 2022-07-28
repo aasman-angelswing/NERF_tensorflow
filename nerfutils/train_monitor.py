@@ -38,8 +38,8 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
             # apply hierarchical sampling and get the t vals for the
             # fine model
             tTvalsFine = self.model.samplePdf(
-                tValsMid=tTvalsCoarseMid, weights=tWeightsCoarse,
-                nF=self.model.nF)
+                bins=tTvalsCoarseMid, weights=tWeightsCoarse,
+                N_importance=self.model.nF)
             tTvalsFine = tf.sort(
                 tf.concat([tTvalsCoarse, tTvalsFine], axis=-1),
                 axis=-1)

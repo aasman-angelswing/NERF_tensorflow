@@ -1,6 +1,7 @@
 # USAGE
 # python train.py
 # setting seed for reproducibility
+#%%
 import os
 from tensorflow.keras.losses import MeanSquaredError
 from tensorflow.keras.optimizers import Adam
@@ -125,11 +126,14 @@ trainMonitorCallback = get_train_monitor(testDs=testDs,
                                          encoderFn=encoder_fn, lxyz=config.L_XYZ, lDir=config.L_DIR,
                                          imagePath=config.IMAGE_PATH)
 # train the NeRF model
+#%%
 print("[INFO] training the nerf model...")
 nerfTrainerModel.fit(trainDs, steps_per_epoch=config.STEPS_PER_EPOCH,
                      validation_data=valDs, validation_steps=config.VALIDATION_STEPS,
-                     epochs=config.EPOCHS
+                     epochs=config.EPOCHS,callbacks=[trainMonitorCallback]
                      )
 # save the coarse and fine model
 nerfTrainerModel.coarseModel.save(config.COARSE_PATH)
 nerfTrainerModel.fineModel.save(config.FINE_PATH)
+
+# %%

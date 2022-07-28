@@ -14,7 +14,7 @@ import imageio
 import os
 
 
-os.chmod('C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow/output/image', 755)
+
 # create a camera2world matrix list to store the novel view
 # camera2world matrices
 c2wList = []
@@ -71,8 +71,8 @@ for element in tqdm(ds):
                       (tValsCoarse[..., 1:] + tValsCoarse[..., :-1]))
     # apply hierarchical sampling and get the t vals for the fine
     # model 
-    tValsFine = sample_pdf(tValsMid=tValsCoarseMid,
-                           weights=weightsCoarse, nF=config.N_F)
+    tValsFine = sample_pdf(bins=tValsCoarseMid,
+                           weights=weightsCoarse, N_importance=config.N_F)
     tValsFine = tf.sort(
         tf.concat([tValsCoarse, tValsFine], axis=-1), axis=-1)
     # build the fine rays and positional encode it
@@ -101,4 +101,4 @@ if not os.path.exists(config.VIDEO_PATH):
     os.makedirs(config.VIDEO_PATH)
 # build the video from the frames and save it to disk
 print("[INFO] creating the video from the frames...")
-imageio.mimwrite(config.OUTPUT_VIDEO_PATH, frameList, fps=config.FPS,format ="gif")
+imageio.mimwrite(config.OUTPUT_VIDEO_PATH+'.gif', frameList, fps=config.FPS)

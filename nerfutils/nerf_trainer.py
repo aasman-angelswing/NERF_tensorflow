@@ -66,8 +66,8 @@ class Nerf_Trainer(tf.keras.Model):
         # apply hierarchical sampling and get the t vals for the fine
         # model
         
-        tValsFine = self.samplePdf(tValsMid=tValsCoarseMid,
-                                   weights=weightsCoarse, nF=self.nF)
+        tValsFine = self.samplePdf(bins=tValsCoarseMid,
+                                   weights=weightsCoarse, N_importance=self.nF)
         tValsFine = tf.sort(
             tf.concat([tValsCoarse, tValsFine], axis=-1), axis=-1)
         # build the fine rays and positional encode it
@@ -137,8 +137,8 @@ class Nerf_Trainer(tf.keras.Model):
                         (tValsCoarse[..., 1:] + tValsCoarse[..., :-1]))
         # apply hierarchical sampling and get the t vals for the fine
         # model
-        tValsFine = self.samplePdf(tValsMid=tValsCoarseMid,
-                                weights=weightsCoarse, nF=self.nF)
+        tValsFine = self.samplePdf(bins=tValsCoarseMid,
+                                weights=weightsCoarse, N_importance=self.nF)
         tValsFine = tf.sort(
             tf.concat([tValsCoarse, tValsFine], axis=-1), axis=-1)
         # build the fine rays and positional encode it

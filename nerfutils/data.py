@@ -106,5 +106,6 @@ class GetRays:
         tVals = tf.cast(tVals, tf.float32)
         tVals = tf.cast(tVals, tf.float32)
         tVals = tVals + noise
+        print(rayO.shape)
         # return ray origin, direction, and the sample points
         return (rayO, rayD, tVals)
