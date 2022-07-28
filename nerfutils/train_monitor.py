@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 
-
 def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
     # grab images and rays from the testing dataset
     (tElements, tImages) = next(iter(testDs))
@@ -21,7 +20,6 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
                                   shape=tDirsCoarseShape)
     tDirsCoarse = encoderFn(tDirsCoarse, lDir)
 
-
     class TrainMonitor(Callback):
         def on_epoch_end(self, epoch, logs=None):
             # compute the coarse model prediction
@@ -34,7 +32,7 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
             (tImageCoarse, _, tWeightsCoarse) = tRenderCoarse
             # compute the middle values of t vals
             tTvalsCoarseMid = (0.5 *
-                            (tTvalsCoarse[..., 1:] + tTvalsCoarse[..., :-1]))
+                               (tTvalsCoarse[..., 1:] + tTvalsCoarse[..., :-1]))
             # apply hierarchical sampling and get the t vals for the
             # fine model
             tTvalsFine = self.model.samplePdf(
@@ -45,8 +43,8 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
                 axis=-1)
             # build the fine rays and positional encode it
             tRaysFine = (tRaysOriCoarse[..., None, :] +
-                        (tRaysDirCoarse[..., None, :] * tTvalsFine[..., None])
-                        )
+                         (tRaysDirCoarse[..., None, :] * tTvalsFine[..., None])
+                         )
             tRaysFine = self.model.encoderFn(tRaysFine, lxyz)
 
             # build the fine directions and positional encode it
@@ -60,7 +58,7 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
 
             # render the image from the model prediction
             tRenderFine = self.model.renderImageDepth(rgb=tRgbFine,
-                                                    sigma=tSigmaFine, tVals=tTvalsFine)
+                                                      sigma=tSigmaFine, tVals=tTvalsFine)
             (tImageFine, tDepthFine, _) = tRenderFine
             # plot the coarse image, fine image, fine depth map and
             # target image
@@ -70,7 +68,7 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
             ax[1].imshow(array_to_img(tImageFine[0]))
             ax[1].set_title(f"Fine Image")
             ax[2].imshow(array_to_img(tDepthFine[0, ..., None]),
-                        cmap="inferno")
+                         cmap="inferno")
             ax[2].set_title(f"Fine Depth Image")
             ax[3].imshow(array_to_img(tImages[0]))
             ax[3].set_title(f"Real Image")
@@ -79,5 +77,5 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
 
             # instantiate a train monitor callback
     trainMonitor = TrainMonitor()
-            # return the train monitor
+    # return the train monitor
     return trainMonitor
