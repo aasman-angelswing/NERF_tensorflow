@@ -1,7 +1,6 @@
 # import the necessary packages
-from tensorflow.keras.metrics import Mean
+
 import tensorflow as tf
-from tensorflow import keras
 
 
 class Nerf_Trainer(tf.keras.Model):
@@ -32,8 +31,8 @@ class Nerf_Trainer(tf.keras.Model):
         # define the photometric loss function
         self.lossFn = lossFn
         # define the loss and psnr tracker
-        self.lossTracker = Mean(name="loss")
-        self.psnrMetric = Mean(name="psnr")
+        self.lossTracker = tf.keras.metrics.Mean(name="loss")
+        self.psnrMetric = tf.keras.metrics.Mean(name="psnr")
 
     def train_step(self, inputs):
         # get the images and the rays
@@ -65,7 +64,7 @@ class Nerf_Trainer(tf.keras.Model):
                           (tValsCoarse[..., 1:] + tValsCoarse[..., :-1]))
         # apply hierarchical sampling and get the t vals for the fine
         # model
-        
+
         tValsFine = self.samplePdf(bins=tValsCoarseMid,
                                    weights=weightsCoarse, N_importance=self.nF)
         tValsFine = tf.sort(
@@ -110,19 +109,18 @@ class Nerf_Trainer(tf.keras.Model):
         return {"loss": self.lossTracker.result(),
                 "psnr": self.psnrMetric.result()}
 
-
     def test_step(self, inputs):
         # get the images and the rays
         (elements, images) = inputs
         (raysOriCoarse, raysDirCoarse, tValsCoarse) = elements
         # generate the coarse rays
         raysCoarse = (raysOriCoarse[..., None, :] +
-                    (raysDirCoarse[..., None, :] * tValsCoarse[..., None]))
+                      (raysDirCoarse[..., None, :] * tValsCoarse[..., None]))
         # positional encode the rays and dirs
         raysCoarse = self.encoderFn(raysCoarse, self.lxyz)
         dirCoarseShape = tf.shape(raysCoarse[..., :3])
         dirsCoarse = tf.broadcast_to(raysDirCoarse[..., None, :],
-                                    shape=dirCoarseShape)
+                                     shape=dirCoarseShape)
         dirsCoarse = self.encoderFn(dirsCoarse, self.lDir)
         # compute the predictions from the coarse model
         (rgbCoarse, sigmaCoarse) = self.coarseModel([raysCoarse,
@@ -130,15 +128,15 @@ class Nerf_Trainer(tf.keras.Model):
 
         # render the image from the predictions
         renderCoarse = self.renderImageDepth(rgb=rgbCoarse,
-                                            sigma=sigmaCoarse, tVals=tValsCoarse)
+                                             sigma=sigmaCoarse, tVals=tValsCoarse)
         (_, _, weightsCoarse) = renderCoarse
         # compute the middle values of t vals
         tValsCoarseMid = (0.5 *
-                        (tValsCoarse[..., 1:] + tValsCoarse[..., :-1]))
+                          (tValsCoarse[..., 1:] + tValsCoarse[..., :-1]))
         # apply hierarchical sampling and get the t vals for the fine
         # model
         tValsFine = self.samplePdf(bins=tValsCoarseMid,
-                                weights=weightsCoarse, N_importance=self.nF)
+                                   weights=weightsCoarse, N_importance=self.nF)
         tValsFine = tf.sort(
             tf.concat([tValsCoarse, tValsFine], axis=-1), axis=-1)
         # build the fine rays and positional encode it
@@ -149,14 +147,14 @@ class Nerf_Trainer(tf.keras.Model):
         # build the fine directions and positional encode it
         dirsFineShape = tf.shape(raysFine[..., :3])
         dirsFine = tf.broadcast_to(raysDirCoarse[..., None, :],
-                                shape=dirsFineShape)
+                                   shape=dirsFineShape)
         dirsFine = self.encoderFn(dirsFine, self.lDir)
         # compute the predictions from the fine model
         rgbFine, sigmaFine = self.fineModel([raysFine, dirsFine])
 
         # render the image from the predictions
         renderFine = self.renderImageDepth(rgb=rgbFine,
-                                        sigma=sigmaFine, tVals=tValsFine)
+                                           sigma=sigmaFine, tVals=tValsFine)
         (imageFine, _, _) = renderFine
         # compute the photometric loss and psnr
         lossFine = self.lossFn(images, imageFine)
@@ -167,7 +165,6 @@ class Nerf_Trainer(tf.keras.Model):
         # return the loss and psnr metrics
         return {"loss": self.lossTracker.result(),
                 "psnr": self.psnrMetric.result()}
-
 
     @property
     def metrics(self):

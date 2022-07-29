@@ -1,12 +1,7 @@
 # import the necessary packages
 import tensorflow as tf
-from tensorflow.io import read_file
-from tensorflow.image import decode_jpeg
-from tensorflow.image import convert_image_dtype
-from tensorflow.image import resize
 from tensorflow import reshape
 import json
-
 
 def read_json(jsonPath):
     # open the json file
@@ -45,13 +40,13 @@ class GetImages():
 
     def __call__(self, imagePath):
         # read the image file
-        image = read_file(imagePath)
+        image = tf.io.read_file(imagePath)
         # decode the image string
-        image = decode_jpeg(image, 3)
+        image = tf.image.decode_jpeg(image, 3)
         # convert the image dtype from uint8 to float32
-        image = convert_image_dtype(image, dtype=tf.float32)
+        image = tf.image.convert_image_dtype(image, dtype=tf.float32)
         # resize the image to the height and width in config
-        image = resize(image, (self.imageWidth, self.imageHeight))
+        image = tf.image.resize(image, (self.imageWidth, self.imageHeight))
         image = reshape(image, (self.imageWidth, self.imageHeight, 3))
         # return the image
         return image

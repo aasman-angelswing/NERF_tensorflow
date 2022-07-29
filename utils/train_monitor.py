@@ -1,6 +1,4 @@
 # import the necessary packages
-from tensorflow.keras.preprocessing.image import array_to_img
-from tensorflow.keras.callbacks import Callback
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
@@ -20,7 +18,7 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
                                   shape=tDirsCoarseShape)
     tDirsCoarse = encoderFn(tDirsCoarse, lDir)
 
-    class TrainMonitor(Callback):
+    class TrainMonitor(tensorflow.keras.callbacks.Callback):
         def on_epoch_end(self, epoch, logs=None):
             # compute the coarse model prediction
             (tRgbCoarse, tSigmaCoarse) = self.model.coarseModel.predict(
@@ -28,7 +26,8 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
 
             # render the image from the model prediction
             tRenderCoarse = self.model.renderImageDepth(rgb=tRgbCoarse,
-                                                        sigma=tSigmaCoarse, tVals=tTvalsCoarse)
+                                                        sigma=tSigmaCoarse, 
+                                                        tVals=tTvalsCoarse)
             (tImageCoarse, _, tWeightsCoarse) = tRenderCoarse
             # compute the middle values of t vals
             tTvalsCoarseMid = (0.5 *
@@ -63,14 +62,14 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
             # plot the coarse image, fine image, fine depth map and
             # target image
             (_, ax) = plt.subplots(nrows=1, ncols=4, figsize=(10, 10))
-            ax[0].imshow(array_to_img(tImageCoarse[0]))
+            ax[0].imshow(tf.keras.preprocesing.image.array_to_img(tImageCoarse[0]))
             ax[0].set_title(f"Corase Image")
-            ax[1].imshow(array_to_img(tImageFine[0]))
+            ax[1].imshow(tf.keras.preprocesing.image.array_to_img(tImageFine[0]))
             ax[1].set_title(f"Fine Image")
-            ax[2].imshow(array_to_img(tDepthFine[0, ..., None]),
+            ax[2].imshow(tf.keras.preprocesing.image.array_to_img(tDepthFine[0, ..., None]),
                          cmap="inferno")
             ax[2].set_title(f"Fine Depth Image")
-            ax[3].imshow(array_to_img(tImages[0]))
+            ax[3].imshow(tf.keras.preprocesing.image.array_to_img(tImages[0]))
             ax[3].set_title(f"Real Image")
             plt.savefig(f"{imagePath}/{epoch:03d}.png")
             plt.close()

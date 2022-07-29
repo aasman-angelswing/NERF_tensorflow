@@ -11,7 +11,7 @@ L_DIR = 4
 N_F = 8
 N_C = 8
 
-main_dir = "C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow"
+main_dir = "/home/aasman/angelswing/NERF_tensorflow"
 
 IMAGE_PATH = main_dir + "/output/image"
 VIDEO_PATH = main_dir + "/output/image"
