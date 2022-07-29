@@ -1,57 +1,56 @@
-# USAGE
-# python train.py
-# setting seed for reproducibility
-#%%
-import os
-from tensorflow.keras.losses import MeanSquaredError
-from tensorflow.keras.optimizers import Adam
-from nerfutils import config
-from nerfutils.train_monitor import get_train_monitor
-from nerfutils.nerf_trainer import Nerf_Trainer
-from nerfutils.nerf import get_model
-from nerfutils.encoder import encoder_fn
-from nerfutils.utils import render_image_depth, sample_pdf
-from nerfutils.data import GetRays
-from nerfutils.data import GetImages
-from nerfutils.data import get_image_c2w
-from nerfutils.data import read_json
-import tensorflow as tf
-tf.random.set_seed(42)
 # import the necessary packages
+
+import os
+import tensorflow as tf
+
+from modules import config
+from modules.train_monitor import get_train_monitor
+from modules.nerf_trainer import Nerf_Trainer
+from modules.nerf import get_model
+from modules.encoder import encoder_fn
+from modules.utils import render_image_depth, sample_pdf
+from modules.data import GetRays
+from modules.data import GetImages
+from modules.data import get_image_c2w
+from modules.data import read_json
+
+tf.random.set_seed(42)
 
 # get the train validation and test data
 print("[INFO] grabbing the data from json files...")
 jsonTrainData = read_json(config.TRAIN_JSON)
 jsonValData = read_json(config.VAL_JSON)
 jsonTestData = read_json(config.TEST_JSON)
+
+#! todo : focal length using imagewidth and fov
 focalLength = 22
-# print the focal length of the camera
-print(f"[INFO] focal length of the camera: {focalLength}...")
 
 # get the train, validation, and test image paths and camera2world
 # matrices
-print("[INFO] grabbing the image paths and camera2world matrices...")
-trainImagePaths, trainC2Ws = get_image_c2w(jsonData=jsonTrainData,
+trainImgPaths, trainC2W = get_image_c2w(jsonData=jsonTrainData,
                                            datasetPath=config.DATASET_PATH)
-valImagePaths, valC2Ws = get_image_c2w(jsonData=jsonValData,
+valImgPaths, valC2W = get_image_c2w(jsonData=jsonValData,
                                        datasetPath=config.DATASET_PATH)
-testImagePaths, testC2Ws = get_image_c2w(jsonData=jsonTestData,
+testImgPaths, testC2W = get_image_c2w(jsonData=jsonTestData,
                                          datasetPath=config.DATASET_PATH)
+
 # instantiate a object of our class used to load images from disk
 getImages = GetImages(imageHeight=config.IMAGE_HEIGHT,
                       imageWidth=config.IMAGE_WIDTH)
 # get the train, validation, and test image dataset
-print("[INFO] building the image dataset pipeline...")
+
 trainImageDs = (
-    tf.data.Dataset.from_tensor_slices(trainImagePaths)
+    tf.data.Dataset.from_tensor_slices(trainImgPaths)
     .map(getImages, num_parallel_calls=config.AUTO)
 )
+
 valImageDs = (
-    tf.data.Dataset.from_tensor_slices(valImagePaths)
+    tf.data.Dataset.from_tensor_slices(valImgPaths)
     .map(getImages, num_parallel_calls=config.AUTO)
 )
+
 testImageDs = (
-    tf.data.Dataset.from_tensor_slices(testImagePaths)
+    tf.data.Dataset.from_tensor_slices(testImgPaths)
     .map(getImages, num_parallel_calls=config.AUTO)
 )
 
@@ -60,17 +59,16 @@ getRays = GetRays(focalLength=focalLength, imageWidth=config.IMAGE_WIDTH,
                   imageHeight=config.IMAGE_HEIGHT, near=config.NEAR, far=config.FAR,
                   nC=config.N_C)
 # get the train validation and test rays dataset
-print("[INFO] building the rays dataset pipeline...")
 trainRayDs = (
-    tf.data.Dataset.from_tensor_slices(trainC2Ws)
+    tf.data.Dataset.from_tensor_slices(trainC2W)
     .map(getRays, num_parallel_calls=config.AUTO)
 )
 valRayDs = (
-    tf.data.Dataset.from_tensor_slices(valC2Ws)
+    tf.data.Dataset.from_tensor_slices(valC2W)
     .map(getRays, num_parallel_calls=config.AUTO)
 )
 testRayDs = (
-    tf.data.Dataset.from_tensor_slices(testC2Ws)
+    tf.data.Dataset.from_tensor_slices(testC2W)
     .map(getRays, num_parallel_calls=config.AUTO)
 )
 
@@ -114,8 +112,8 @@ nerfTrainerModel = Nerf_Trainer(coarseModel=coarseModel, fineModel=fineModel,
                                 renderImageDepth=render_image_depth, samplePdf=sample_pdf,
                                 nF=config.N_F)
 # compile the nerf trainer model with Adam optimizer and MSE loss
-nerfTrainerModel.compile(optimizerCoarse=Adam(), optimizerFine=Adam(),
-                         lossFn=MeanSquaredError())
+nerfTrainerModel.compile(optimizerCoarse=tf.keras.optimizers.Adam(), optimizerFine=tf.keras.optimizers.Adam(),
+                         lossFn=tf.keras.losses.MeanSquaredError())
 
 # check if the output image directory already exists, if it doesn't,
 # then create it
@@ -126,14 +124,10 @@ trainMonitorCallback = get_train_monitor(testDs=testDs,
                                          encoderFn=encoder_fn, lxyz=config.L_XYZ, lDir=config.L_DIR,
                                          imagePath=config.IMAGE_PATH)
 # train the NeRF model
-#%%
-print("[INFO] training the nerf model...")
 nerfTrainerModel.fit(trainDs, steps_per_epoch=config.STEPS_PER_EPOCH,
                      validation_data=valDs, validation_steps=config.VALIDATION_STEPS,
-                     epochs=config.EPOCHS,callbacks=[trainMonitorCallback]
+                     epochs=config.EPOCHS, callbacks=[trainMonitorCallback]
                      )
 # save the coarse and fine model
 nerfTrainerModel.coarseModel.save(config.COARSE_PATH)
 nerfTrainerModel.fineModel.save(config.FINE_PATH)
-
-# %%
