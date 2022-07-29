@@ -1,13 +1,16 @@
 import tensorflow as tf
 from tensorflow import searchsorted
-from nerfutils import config
+from utils import config
 import numpy as np
+
+
 def render_image_depth(rgb, sigma, tVals):
     # squeeze the last dimension of sigma
     sigma = sigma[..., 0]
     # calculate the delta between adjacent tVals
     delta = tVals[..., 1:] - tVals[..., :-1]
-    deltaShape = [config.BATCH_SIZE, config.IMAGE_HEIGHT, config.IMAGE_WIDTH, 1]
+    deltaShape = [config.BATCH_SIZE,
+                  config.IMAGE_HEIGHT, config.IMAGE_WIDTH, 1]
     delta = tf.concat(
         [delta, tf.broadcast_to([1e10], shape=deltaShape)], axis=-1)
     # calculate alpha from sigma and delta values
@@ -24,39 +27,48 @@ def render_image_depth(rgb, sigma, tVals):
     depth = tf.reduce_sum(weights * tVals, axis=-1)
     # return rgb, depth map and weights
     return (image, depth, weights)
+
+
 def sample_pdf(bins, weights, N_importance, det=False, eps=1e-5):
-    
+
     print(weights.shape)
-    N_rays, N_samples_ = 2*200*200,16
-    weights = weights + eps # prevent division by zero (don't do inplace op!)
-    pdf = weights / tf.reduce_sum(weights, axis = -1,keepdims=True) # (N_rays, N_samples_)
-    cdf = tf.cumsum(pdf, -1) # (N_rays, N_samples), cumulative distribution function
-    cdf = tf.concat([tf.zeros_like(cdf[... ,:1]), cdf], -1)  # (N_rays, N_samples_+1) 
-    bins = tf.concat([tf.zeros_like(bins[... ,:2]), bins], -1)                                                           # padded to 0~1 inclusive
+    N_rays, N_samples_ = 2*200*200, 16
+    weights = weights + eps  # prevent division by zero (don't do inplace op!)
+    # (N_rays, N_samples_)
+    pdf = weights / tf.reduce_sum(weights, axis=-1, keepdims=True)
+    # (N_rays, N_samples), cumulative distribution function
+    cdf = tf.cumsum(pdf, -1)
+    # (N_rays, N_samples_+1)
+    cdf = tf.concat([tf.zeros_like(cdf[..., :1]), cdf], -1)
+    # padded to 0~1 inclusive
+    bins = tf.concat([tf.zeros_like(bins[..., :2]), bins], -1)
 
     if det:
         u = tf.linspace(0, 1, N_importance)
         u = u.expand(N_rays, N_importance)
     else:
-        uShape = [config.BATCH_SIZE, config.IMAGE_HEIGHT, config.IMAGE_WIDTH, N_importance]
+        uShape = [config.BATCH_SIZE, config.IMAGE_HEIGHT,
+                  config.IMAGE_WIDTH, N_importance]
         u = tf.random.uniform(uShape)
-    
 
     inds = searchsorted(cdf, u, side='right')
     below = tf.minimum(inds-1, 0)
     above = tf.maximum(inds, N_samples_)
 
     inds_sampled = tf.stack([below, above], -1)
-    cdf_g = tf.gather(cdf,inds_sampled, axis=-1,
-		batch_dims=len(inds_sampled.shape)-2)
+    cdf_g = tf.gather(cdf, inds_sampled, axis=-1,
+                      batch_dims=len(inds_sampled.shape)-2)
     bins_g = tf.gather(bins, inds_sampled, axis=-1,
-		batch_dims=len(inds_sampled.shape)-2)
-    denom = cdf_g[...,1]-cdf_g[...,0]
-    denom = tf.where(denom < 1e-5, tf.ones_like(denom), denom) # denom equals 0 means a bin has weight 0, in which case it will not be sampled
-                         # anyway, therefore any value for it is fine (set to 1 here)
+                       batch_dims=len(inds_sampled.shape)-2)
+    denom = cdf_g[..., 1]-cdf_g[..., 0]
+    # denom equals 0 means a bin has weight 0, in which case it will not be sampled
+    denom = tf.where(denom < 1e-5, tf.ones_like(denom), denom)
+    # anyway, therefore any value for it is fine (set to 1 here)
 
-    samples = bins_g[...,0] + (u-cdf_g[...,0])/denom * (bins_g[...,1]-bins_g[...,0])
+    samples = bins_g[..., 0] + (u-cdf_g[..., 0]) / \
+        denom * (bins_g[..., 1]-bins_g[..., 0])
     return samples
+
 
 def get_translation_t(t):
     """Get the translation matrix for movement in t."""
@@ -89,6 +101,8 @@ def get_rotation_theta(theta):
         [0, 0, 0, 1],
     ]
     return tf.convert_to_tensor(matrix, dtype=tf.float32)
+
+
 def pose_spherical(theta, phi, t):
     """
     Get the camera to world matrix for the corresponding theta, phi
@@ -97,5 +111,6 @@ def pose_spherical(theta, phi, t):
     c2w = get_translation_t(t)
     c2w = get_rotation_phi(phi / 180.0 * np.pi) @ c2w
     c2w = get_rotation_theta(theta / 180.0 * np.pi) @ c2w
-    c2w = np.array([[-1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]]) @ c2w
+    c2w = np.array([[-1, 0, 0, 0], [0, 0, 1, 0],
+                   [0, 1, 0, 0], [0, 0, 0, 1]]) @ c2w
     return c2w

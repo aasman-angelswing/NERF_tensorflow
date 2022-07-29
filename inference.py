@@ -1,18 +1,17 @@
 # import the necessary packages
-from nerfutils import config
-from nerfutils.utils import pose_spherical
-from nerfutils.data import GetRays
-from nerfutils.data import read_json
-from nerfutils.encoder import encoder_fn
-from nerfutils.utils import render_image_depth
-from nerfutils.utils import sample_pdf
-from tensorflow.keras.models import load_model
-from tqdm import tqdm
 import tensorflow as tf
 import numpy as np
 import imageio
+from tqdm import tqdm
 import os
 
+from utils import config
+from utils.utility import pose_spherical
+from utils.data import GetRays
+from utils.data import read_json
+from utils.encoder import pos_embedding
+from utils.utility import render_image_depth
+from utils.utility import sample_pdf
 
 
 # create a camera2world matrix list to store the novel view
@@ -41,8 +40,8 @@ ds = (
     .batch(config.BATCH_SIZE)
 )
 # load the coarse and the fine model
-coarseModel = load_model(config.COARSE_PATH, compile=False)
-fineModel = load_model(config.FINE_PATH, compile=False)
+coarseModel = tf.keras.models.tf.keras.models.load_model(config.COARSE_PATH, compile=False)
+fineModel = tf.keras.models.tf.keras.models.load_model(config.FINE_PATH, compile=False)
 
 # create a list to hold all the novel view from the nerf model
 print("[INFO] grabbing the novel views...")
@@ -53,11 +52,11 @@ for element in tqdm(ds):
     raysCoarse = (raysOriCoarse[..., None, :] +
                   (raysDirCoarse[..., None, :] * tValsCoarse[..., None]))
     # positional encode the rays and dirs
-    raysCoarse = encoder_fn(raysCoarse, config.L_XYZ)
+    raysCoarse = pos_embedding(raysCoarse, config.L_XYZ)
     dirCoarseShape = tf.shape(raysCoarse[..., :3])
     dirsCoarse = tf.broadcast_to(raysDirCoarse[..., None, :],
                                  shape=dirCoarseShape)
-    dirsCoarse = encoder_fn(dirsCoarse, config.L_DIR)
+    dirsCoarse = pos_embedding(dirsCoarse, config.L_DIR)
     # compute the predictions from the coarse model
     (rgbCoarse, sigmaCoarse) = coarseModel.predict(
         [raysCoarse, dirsCoarse])
@@ -78,13 +77,13 @@ for element in tqdm(ds):
     # build the fine rays and positional encode it
     raysFine = (raysOriCoarse[..., None, :] +
                 (raysDirCoarse[..., None, :] * tValsFine[..., None]))
-    raysFine = encoder_fn(raysFine, config.L_XYZ)
+    raysFine = pos_embedding(raysFine, config.L_XYZ)
 
     # build the fine directions and positional encode it
     dirsFineShape = tf.shape(raysFine[..., :3])
     dirsFine = tf.broadcast_to(raysDirCoarse[..., None, :],
                                shape=dirsFineShape)
-    dirsFine = encoder_fn(dirsFine, config.L_DIR)
+    dirsFine = pos_embedding(dirsFine, config.L_DIR)
     # compute the predictions from the fine model
     (rgbFine, sigmaFine) = fineModel.predict([raysFine, dirsFine])
 

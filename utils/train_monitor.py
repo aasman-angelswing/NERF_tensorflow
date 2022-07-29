@@ -18,7 +18,7 @@ def get_train_monitor(testDs, encoderFn, lxyz, lDir, imagePath):
                                   shape=tDirsCoarseShape)
     tDirsCoarse = encoderFn(tDirsCoarse, lDir)
 
-    class TrainMonitor(tensorflow.keras.callbacks.Callback):
+    class TrainMonitor(tf.keras.callbacks.Callback):
         def on_epoch_end(self, epoch, logs=None):
             # compute the coarse model prediction
             (tRgbCoarse, tSigmaCoarse) = self.model.coarseModel.predict(

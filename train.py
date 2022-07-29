@@ -3,16 +3,16 @@
 import os
 import tensorflow as tf
 
-from modules import config
-from modules.train_monitor import get_train_monitor
-from modules.nerf_trainer import Nerf_Trainer
-from modules.nerf import get_model
-from modules.encoder import encoder_fn
-from modules.utils import render_image_depth, sample_pdf
-from modules.data import GetRays
-from modules.data import GetImages
-from modules.data import get_image_c2w
-from modules.data import read_json
+from utils import config
+from utils.train_monitor import get_train_monitor
+from utils.nerf_trainer import Nerf_Trainer
+from utils.nerf import get_model
+from utils.encoder import pos_embedding
+from utils.utility import render_image_depth, sample_pdf
+from utils.data import GetRays
+from utils.data import GetImages
+from utils.data import get_image_c2w
+from utils.data import read_json
 
 tf.random.set_seed(42)
 
@@ -108,7 +108,7 @@ fineModel = get_model(lxyz=config.L_XYZ, lDir=config.L_DIR,
                       skipLayer=config.SKIP_LAYER)
 # instantiate the nerf trainer model
 nerfTrainerModel = Nerf_Trainer(coarseModel=coarseModel, fineModel=fineModel,
-                                lxyz=config.L_XYZ, lDir=config.L_DIR, encoderFn=encoder_fn,
+                                lxyz=config.L_XYZ, lDir=config.L_DIR, encoderFn=pos_embedding,
                                 renderImageDepth=render_image_depth, samplePdf=sample_pdf,
                                 nF=config.N_F)
 # compile the nerf trainer model with Adam optimizer and MSE loss
@@ -121,7 +121,7 @@ if not os.path.exists(config.IMAGE_PATH):
     os.makedirs(config.IMAGE_PATH)
 # get the train monitor callback
 trainMonitorCallback = get_train_monitor(testDs=testDs,
-                                         encoderFn=encoder_fn, lxyz=config.L_XYZ, lDir=config.L_DIR,
+                                         encoderFn=pos_embedding, lxyz=config.L_XYZ, lDir=config.L_DIR,
                                          imagePath=config.IMAGE_PATH)
 # train the NeRF model
 nerfTrainerModel.fit(trainDs, steps_per_epoch=config.STEPS_PER_EPOCH,
