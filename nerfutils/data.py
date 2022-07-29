@@ -1,4 +1,5 @@
 # import the necessary packages
+from numpy import asarray
 import tensorflow as tf
 from tensorflow.io import read_file
 from tensorflow.image import decode_jpeg
@@ -8,6 +9,7 @@ from tensorflow import reshape
 import json
 from nerfutils.encoder import encode_position
 from nerfutils import config
+import numpy as np
 
 
 def read_json(jsonPath):
@@ -43,7 +45,7 @@ def get_image_c2w(jsonData, datasetPath):
 
 def GetImages(imagePath):
     images = []
-    for imagePath in imagePath
+    for imagePath in imagePath:
         image = read_file(imagePath)
             # decode the image string
         image = decode_jpeg(image, 3)
@@ -52,8 +54,12 @@ def GetImages(imagePath):
             # resize the image to the height and width in config
         image = resize(image, (200, 200))
         image = reshape(image, (200, 200, 3))
+        image = asarray(image)
         images.append(image)
-            # return the image
+        
+        
+    
+    images = asarray(images)        # return the image
     return images
 
 

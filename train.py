@@ -41,26 +41,15 @@ print(f"[INFO] focal length of the camera: {focalLength}...")
 print("[INFO] grabbing the image paths and camera2world matrices...")
 trainImagePaths, trainC2Ws = get_image_c2w(jsonData=jsonTrainData,
                                            datasetPath=config.DATASET_PATH)
-print(trainImagePaths)
-train_images = []
-for filename in glob.glob('C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow/dataset/train/*.png'): #assuming gif
-    im=Image.open(filename)
-    train_images.append(im)
-val_images = []
-for filename in glob.glob('C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow/dataset/val/*.png'): #assuming gif
-    im=Image.open(filename)
-    val_images.append(im)
-test_images = []
-for filename in glob.glob('C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow/dataset/test/*.png'): #assuming gif
-    im=Image.open(filename)
-    test_images.append(im)
+train_images = GetImages(trainImagePaths)
+
 
 valImagePaths, valC2Ws = get_image_c2w(jsonData=jsonValData,
                                        datasetPath=config.DATASET_PATH)
-
+val_images = GetImages(valImagePaths)
 testImagePaths, testC2Ws = get_image_c2w(jsonData=jsonTestData,
                                          datasetPath=config.DATASET_PATH)
-
+test_images = GetImages(testImagePaths)
 # instantiate a object of our class used to load images from disk
 valC2Ws = np.array(valC2Ws)
 valC2Ws = tf.cast(valC2Ws, tf.float32)
@@ -85,22 +74,20 @@ testRayDs = test_pose_ds.map(map_fn, num_parallel_calls=config.AUTO)
 
 
 # zip the images and rays dataset together
-trainDs = tf.data.Dataset.zip((trainRayDs, trainImageDs))
-valDs = tf.data.Dataset.zip((valRayDs, valImageDs))
-testDs = tf.data.Dataset.zip((testRayDs, testImageDs))
+trainDs = tf.data.Dataset.zip((trainImageDs,trainRayDs))
+valDs = tf.data.Dataset.zip(( valImageDs,valRayDs,))
+testDs = tf.data.Dataset.zip((testImageDs,testRayDs,))
 # build data input pipeline for train, val, and test datasets
 trainDs = (
     trainDs
     .shuffle(config.BATCH_SIZE)
     .batch(config.BATCH_SIZE)
-    .repeat()
     .prefetch(config.AUTO)
 )
 valDs = (
     valDs
     .shuffle(config.BATCH_SIZE)
     .batch(config.BATCH_SIZE)
-    .repeat()
     .prefetch(config.AUTO)
 )
 testDs = (
