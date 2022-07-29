@@ -1,18 +1,18 @@
 # import the necessary packages
 import tensorflow as tf
+from nerfutils import config
 
+def encode_position(x):
+    """Encodes the position into its corresponding Fourier feature.
 
-def encoder_fn(p, L):
-    # build the list of positional encodings
-    gamma = [p]
-    # iterate over the number of dimensions in time
-    for i in range(L):
-        # insert sine and cosine of the product of current dimension
-        # and the position vector
-        gamma.append(tf.sin((2.0 ** i) * p))
-        gamma.append(tf.cos((2.0 ** i) * p))
+    Args:
+        x: The input coordinate.
 
-    # concatenate the positional encodings into a positional vector
-    gamma = tf.concat(gamma, axis=-1)
-    # return the positional encoding vector
-    return gamma
+    Returns:
+        Fourier features tensors of the position.
+    """
+    positions = [x]
+    for i in range(config.POS_ENCODE_DIMS):
+        for fn in [tf.sin, tf.cos]:
+            positions.append(fn(2.0**i * x))
+    return tf.concat(positions, axis=-1)

@@ -2,174 +2,69 @@
 from tensorflow.keras.metrics import Mean
 import tensorflow as tf
 from tensorflow import keras
+from nerfutils.nerf import render_rgb_depth
 
-
-class Nerf_Trainer(tf.keras.Model):
-    def __init__(self, coarseModel, fineModel, lxyz, lDir,
-                 encoderFn, renderImageDepth, samplePdf, nF):
+class NeRF(keras.Model):
+    def __init__(self, nerf_model):
         super().__init__()
-        # define the coarse model and fine model
-        self.coarseModel = coarseModel
-        self.fineModel = fineModel
-        # define the dimensions for positional encoding for spatial
-        # coordinates and direction
-        self.lxyz = lxyz
-        self.lDir = lDir
-        # define the positional encoder
-        self.encoderFn = encoderFn
-        # define the volume rendering function
-        self.renderImageDepth = renderImageDepth
-        # define the hierarchical sampling function and the number of
-        # samples for the fine model
-        self.samplePdf = samplePdf
-        self.nF = nF
+        self.nerf_model = nerf_model
 
-    def compile(self, optimizerCoarse, optimizerFine, lossFn):
+    def compile(self, optimizer, loss_fn):
         super().compile()
-        # define the optimizer for the coarse and fine model
-        self.optimizerCoarse = optimizerCoarse
-        self.optimizerFine = optimizerFine
-        # define the photometric loss function
-        self.lossFn = lossFn
-        # define the loss and psnr tracker
-        self.lossTracker = Mean(name="loss")
-        self.psnrMetric = Mean(name="psnr")
+        self.optimizer = optimizer
+        self.loss_fn = loss_fn
+        self.loss_tracker = keras.metrics.Mean(name="loss")
+        self.psnr_metric = keras.metrics.Mean(name="psnr")
 
     def train_step(self, inputs):
-        # get the images and the rays
-        (elements, images) = inputs
-        (raysOriCoarse, raysDirCoarse, tValsCoarse) = elements
-        # generate the coarse rays
-        raysCoarse = (raysOriCoarse[..., None, :] +
-                      (raysDirCoarse[..., None, :] * tValsCoarse[..., None]))
-        # positional encode the rays and dirs
-        raysCoarse = self.encoderFn(raysCoarse, self.lxyz)
-        dirCoarseShape = tf.shape(raysCoarse[..., :3])
-        dirsCoarse = tf.broadcast_to(raysDirCoarse[..., None, :],
-                                     shape=dirCoarseShape)
-        dirsCoarse = self.encoderFn(dirsCoarse, self.lDir)
-        # keep track of our gradients
-        with tf.GradientTape() as coarseTape:
-            # compute the predictions from the coarse model
-            (rgbCoarse, sigmaCoarse) = self.coarseModel([raysCoarse,
-                                                         dirsCoarse])
+        # Get the images and the rays.
+        (images, rays) = inputs
+        (rays_flat, t_vals) = rays
 
-            # render the image from the predictions
-            renderCoarse = self.renderImageDepth(rgb=rgbCoarse,
-                                                 sigma=sigmaCoarse, tVals=tValsCoarse)
-            (imagesCoarse, _, weightsCoarse) = renderCoarse
-            # compute the photometric loss
-            lossCoarse = self.lossFn(images, imagesCoarse)
-        # compute the middle values of t vals
-        tValsCoarseMid = (0.5 *
-                          (tValsCoarse[..., 1:] + tValsCoarse[..., :-1]))
-        # apply hierarchical sampling and get the t vals for the fine
-        # model
-        
-        tValsFine = self.samplePdf(bins=tValsCoarseMid,
-                                   weights=weightsCoarse, N_importance=self.nF)
-        tValsFine = tf.sort(
-            tf.concat([tValsCoarse, tValsFine], axis=-1), axis=-1)
-        # build the fine rays and positional encode it
-        raysFine = (raysOriCoarse[..., None, :] +
-                    (raysDirCoarse[..., None, :] * tValsFine[..., None]))
-        raysFine = self.encoderFn(raysFine, self.lxyz)
+        with tf.GradientTape() as tape:
+            # Get the predictions from the model.
+            rgb, _ = render_rgb_depth(
+                model=self.nerf_model, rays_flat=rays_flat, t_vals=t_vals, rand=True
+            )
+            loss = self.loss_fn(images, rgb)
 
-        # build the fine directions and positional encode it
-        dirsFineShape = tf.shape(raysFine[..., :3])
-        dirsFine = tf.broadcast_to(raysDirCoarse[..., None, :],
-                                   shape=dirsFineShape)
-        dirsFine = self.encoderFn(dirsFine, self.lDir)
-        # keep track of our gradients
-        with tf.GradientTape() as fineTape:
-            # compute the predictions from the fine model
-            rgbFine, sigmaFine = self.fineModel([raysFine, dirsFine])
+        # Get the trainable variables.
+        trainable_variables = self.nerf_model.trainable_variables
 
-            # render the image from the predictions
-            renderFine = self.renderImageDepth(rgb=rgbFine,
-                                               sigma=sigmaFine, tVals=tValsFine)
-            (imageFine, _, _) = renderFine
-            # compute the photometric loss
-            lossFine = self.lossFn(images, imageFine)
-        # get the trainable variables from the coarse model and
-        # apply back propagation
-        tvCoarse = self.coarseModel.trainable_variables
-        gradsCoarse = coarseTape.gradient(lossCoarse, tvCoarse)
-        self.optimizerCoarse.apply_gradients(zip(gradsCoarse,
-                                                 tvCoarse))
-        # get the trainable variables from the coarse model and
-        # apply back propagation
-        tvFine = self.fineModel.trainable_variables
-        gradsFine = fineTape.gradient(lossFine, tvFine)
-        self.optimizerFine.apply_gradients(zip(gradsFine, tvFine))
-        psnr = tf.image.psnr(images, imageFine, max_val=1.0)
-        # compute the loss and psnr metrics
-        self.lossTracker.update_state(lossFine)
-        self.psnrMetric.update_state(psnr)
-        # return the loss and psnr metrics
-        return {"loss": self.lossTracker.result(),
-                "psnr": self.psnrMetric.result()}
+        # Get the gradeints of the trainiable variables with respect to the loss.
+        gradients = tape.gradient(loss, trainable_variables)
 
+        # Apply the grads and optimize the model.
+        self.optimizer.apply_gradients(zip(gradients, trainable_variables))
+
+        # Get the PSNR of the reconstructed images and the source images.
+        psnr = tf.image.psnr(images, rgb, max_val=1.0)
+
+        # Compute our own metrics
+        self.loss_tracker.update_state(loss)
+        self.psnr_metric.update_state(psnr)
+        return {"loss": self.loss_tracker.result(), "psnr": self.psnr_metric.result()}
 
     def test_step(self, inputs):
-        # get the images and the rays
-        (elements, images) = inputs
-        (raysOriCoarse, raysDirCoarse, tValsCoarse) = elements
-        # generate the coarse rays
-        raysCoarse = (raysOriCoarse[..., None, :] +
-                    (raysDirCoarse[..., None, :] * tValsCoarse[..., None]))
-        # positional encode the rays and dirs
-        raysCoarse = self.encoderFn(raysCoarse, self.lxyz)
-        dirCoarseShape = tf.shape(raysCoarse[..., :3])
-        dirsCoarse = tf.broadcast_to(raysDirCoarse[..., None, :],
-                                    shape=dirCoarseShape)
-        dirsCoarse = self.encoderFn(dirsCoarse, self.lDir)
-        # compute the predictions from the coarse model
-        (rgbCoarse, sigmaCoarse) = self.coarseModel([raysCoarse,
-                                                    dirsCoarse])
+        # Get the images and the rays.
+        (images, rays) = inputs
+        (rays_flat, t_vals) = rays
 
-        # render the image from the predictions
-        renderCoarse = self.renderImageDepth(rgb=rgbCoarse,
-                                            sigma=sigmaCoarse, tVals=tValsCoarse)
-        (_, _, weightsCoarse) = renderCoarse
-        # compute the middle values of t vals
-        tValsCoarseMid = (0.5 *
-                        (tValsCoarse[..., 1:] + tValsCoarse[..., :-1]))
-        # apply hierarchical sampling and get the t vals for the fine
-        # model
-        tValsFine = self.samplePdf(bins=tValsCoarseMid,
-                                weights=weightsCoarse, N_importance=self.nF)
-        tValsFine = tf.sort(
-            tf.concat([tValsCoarse, tValsFine], axis=-1), axis=-1)
-        # build the fine rays and positional encode it
-        raysFine = (raysOriCoarse[..., None, :] +
-                    (raysDirCoarse[..., None, :] * tValsFine[..., None]))
-        raysFine = self.encoderFn(raysFine, self.lxyz)
+        # Get the predictions from the model.
+        rgb, _ = render_rgb_depth(
+            model=self.nerf_model, rays_flat=rays_flat, t_vals=t_vals, rand=True
+        )
+        loss = self.loss_fn(images, rgb)
 
-        # build the fine directions and positional encode it
-        dirsFineShape = tf.shape(raysFine[..., :3])
-        dirsFine = tf.broadcast_to(raysDirCoarse[..., None, :],
-                                shape=dirsFineShape)
-        dirsFine = self.encoderFn(dirsFine, self.lDir)
-        # compute the predictions from the fine model
-        rgbFine, sigmaFine = self.fineModel([raysFine, dirsFine])
+        # Get the PSNR of the reconstructed images and the source images.
+        psnr = tf.image.psnr(images, rgb, max_val=1.0)
 
-        # render the image from the predictions
-        renderFine = self.renderImageDepth(rgb=rgbFine,
-                                        sigma=sigmaFine, tVals=tValsFine)
-        (imageFine, _, _) = renderFine
-        # compute the photometric loss and psnr
-        lossFine = self.lossFn(images, imageFine)
-        psnr = tf.image.psnr(images, imageFine, max_val=1.0)
-        # compute the loss and psnr metrics
-        self.lossTracker.update_state(lossFine)
-        self.psnrMetric.update_state(psnr)
-        # return the loss and psnr metrics
-        return {"loss": self.lossTracker.result(),
-                "psnr": self.psnrMetric.result()}
-
+        # Compute our own metrics
+        self.loss_tracker.update_state(loss)
+        self.psnr_metric.update_state(psnr)
+        return {"loss": self.loss_tracker.result(), "psnr": self.psnr_metric.result()}
 
     @property
     def metrics(self):
-        # return the loss and psnr tracker
-        return [self.lossTracker, self.psnrMetric]
+        return [self.loss_tracker, self.psnr_metric]
+
