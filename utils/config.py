@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 
 SAMPLE_THETA_POINTS = 10
 
@@ -14,8 +15,11 @@ N_C = 16
 main_dir = "C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow"
 
 OUTPUT_IMAGE_PATH = main_dir + "/output/images"
+OUTPUT_INFERENCE_PATH = main_dir + "/output/inferences"
+OUTPUT_VIDEO_PATH = main_dir + "/output/videos"
+OUTPUT_GIF_PATH = main_dir + "/output"
+MODEL_PATH = main_dir + "/output"
 
-OUTPUT_VIDEO_PATH = main_dir + "/output/video"
 
 FPS = 30
 QUALITY = 7
@@ -38,4 +42,10 @@ VALIDATION_STEPS = 20
 EPOCHS = 10
 
 
-
+def create_dir():
+    if not os.path.exists(OUTPUT_INFERENCE_PATH):
+        os.makedirs(OUTPUT_INFERENCE_PATH)
+    if not os.path.exists(OUTPUT_IMAGE_PATH):
+        os.makedirs(OUTPUT_IMAGE_PATH)
+    if not os.path.exists(OUTPUT_VIDEO_PATH):
+        os.makedirs(OUTPUT_VIDEO_PATH)

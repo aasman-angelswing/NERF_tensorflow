@@ -1,33 +1,20 @@
-# USAGE
-# python train.py
-# setting seed for reproducibility
-#%%
-import os
-from tensorflow.keras.losses import MeanSquaredError
-from tensorflow.keras.optimizers import Adam
+# importing the necessary libraries
 from utils import config
 from utils.nerf_trainer import NeRF
-from utils.nerf import get_nerf_model
-from utils.encoder import encode_position
-from utils.data import get_rays
-from utils.data import GetImages
-from utils.data import get_image_c2w
-from utils.data import read_json
-from utils.data import map_fn
+from utils.nerf import get_nerf_model, render_rgb_depth
+from utils.data import *
+from utils.config import create_dir
+from utils.train_monitor import get_train_monitor
+from visual import inference
+
+
 import tensorflow as tf
-import matplotlib.pyplot as plt
-from tensorflow import keras
-from utils.nerf import render_rgb_depth
-import glob
-import imageio
-from tqdm import tqdm
 import numpy as np
 
-from utils.train_monitor import get_train_monitor
+# setting seed for reproducibility
 tf.random.set_seed(42)
-from PIL import Image
-import glob
-# import the necessary packages
+
+create_dir()
 
 # get the train validation and test data
 print("[INFO] grabbing the data from json files...")
@@ -44,7 +31,6 @@ print("[INFO] grabbing the image paths and camera2world matrices...")
 trainImagePaths, trainC2Ws = get_image_c2w(jsonData=jsonTrainData,
                                            datasetPath=config.DATASET_PATH)
 train_images = GetImages(trainImagePaths)
-
 
 valImagePaths, valC2Ws = get_image_c2w(jsonData=jsonValData,
                                        datasetPath=config.DATASET_PATH)
@@ -66,8 +52,6 @@ val_pose_ds = tf.data.Dataset.from_tensor_slices(valC2Ws)
 test_pose_ds = tf.data.Dataset.from_tensor_slices(testC2Ws)
 
 
-
-       
 # get the train validation and test rays dataset
 print("[INFO] building the rays dataset pipeline...")
 trainRayDs = train_pose_ds.map(map_fn, num_parallel_calls=config.AUTO)
@@ -76,9 +60,9 @@ testRayDs = test_pose_ds.map(map_fn, num_parallel_calls=config.AUTO)
 
 
 # zip the images and rays dataset together
-trainDs = tf.data.Dataset.zip((trainImageDs,trainRayDs))
-valDs = tf.data.Dataset.zip(( valImageDs,valRayDs,))
-testDs = tf.data.Dataset.zip((testImageDs,testRayDs,))
+trainDs = tf.data.Dataset.zip((trainImageDs, trainRayDs))
+valDs = tf.data.Dataset.zip((valImageDs, valRayDs,))
+testDs = tf.data.Dataset.zip((testImageDs, testRayDs,))
 # build data input pipeline for train, val, and test datasets
 trainDs = (
     trainDs
@@ -101,44 +85,27 @@ testDs = (
 )
 
 
-trainMonitorCallback = get_train_monitor(testDs, render_rgb_depth = render_rgb_depth, OUTPUT_IMAGE_PATH = config.OUTPUT_IMAGE_PATH)
+trainMonitorCallback = get_train_monitor(
+    testDs, render_rgb_depth=render_rgb_depth, OUTPUT_IMAGE_PATH=config.OUTPUT_IMAGE_PATH)
 
-   
-        
 num_pos = config.IMAGE_HEIGHT * config.IMAGE_WIDTH * config.NUM_SAMPLES
 nerf_model = get_nerf_model(num_layers=8, num_pos=num_pos)
 
 model = NeRF(nerf_model)
 model.compile(
-    optimizer=keras.optimizers.Adam(), loss_fn=keras.losses.MeanSquaredError()
+    optimizer=tf.keras.optimizers.Adam(), loss_fn=tf.keras.losses.MeanSquaredError()
 )
 
-# Create a directory to save the images during training.
-if not os.path.exists("images"):
-    os.makedirs("images")
-
-#%%
 model.fit(
     trainDs,
     validation_data=valDs,
-    #batch_size=config.BATCH_SIZE,
+    # batch_size=config.BATCH_SIZE,
     epochs=config.EPOCHS,
     callbacks=[trainMonitorCallback],
-   # steps_per_epoch=config.STEPS_PER_EPOCH,
+    # steps_per_epoch=config.STEPS_PER_EPOCH,
 )
 
-#%%
+model.nerf_model.save(config.MODEL_PATH)
 
-def create_gif(path_to_images, name_gif):
-    filenames = glob.glob(path_to_images)
-    filenames = sorted(filenames)
-    images = []
-    for filename in tqdm(filenames):
-        images.append(imageio.imread(filename))
-    kargs = {"duration": 0.25}
-    imageio.mimsave(name_gif, images, "GIF", **kargs)
-
-
-create_gif("images/*.png", "training.gif")
-
-
+inference(nerf_model=model.nerf_model, render_rgb_depth=render_rgb_depth,
+          testDs=testDs, OUTPUT_INFERENCE_PATH=config.OUTPUT_INFERENCE_PATH)

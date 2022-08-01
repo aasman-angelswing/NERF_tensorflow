@@ -2,6 +2,7 @@
 import tensorflow as tf
 from utils import config
 
+
 def encode_position(x):
     """Encodes the position into its corresponding Fourier feature.
 

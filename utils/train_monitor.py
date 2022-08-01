@@ -1,8 +1,7 @@
 import tensorflow as tf
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import config
-
 
 
 def get_train_monitor(testDs, render_rgb_depth, OUTPUT_IMAGE_PATH):
@@ -25,7 +24,7 @@ def get_train_monitor(testDs, render_rgb_depth, OUTPUT_IMAGE_PATH):
             )
 
             # Plot the rgb, depth and the loss plot.
-            fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(20, 5))
+            fig, ax = plt.subplot(nrows=1, ncols=3, figsize=(20, 5))
             ax[0].imshow(tf.keras.preprocessing.image.array_to_img(test_recons_images[0]))
             ax[0].set_title(f"Predicted Image: {epoch:03d}")
 
