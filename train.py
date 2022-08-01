@@ -80,14 +80,16 @@ testDs = tf.data.Dataset.zip((testImageDs,testRayDs,))
 # build data input pipeline for train, val, and test datasets
 trainDs = (
     trainDs
-    .shuffle(config.BATCH_SIZE)
-    .batch(config.BATCH_SIZE)
+    .shuffle(config.BATCH_SIZE,)
+    .batch(config.BATCH_SIZE, drop_remainder=True, num_parallel_calls=config.AUTO).
+    repeat(2)
     .prefetch(config.AUTO)
 )
 valDs = (
     valDs
     .shuffle(config.BATCH_SIZE)
-    .batch(config.BATCH_SIZE)
+    .batch(config.BATCH_SIZE, drop_remainder=True, num_parallel_calls=config.AUTO)
+    .repeat(2)
     .prefetch(config.AUTO)
 )
 testDs = (
@@ -145,10 +147,10 @@ if not os.path.exists("images"):
 model.fit(
     trainDs,
     validation_data=valDs,
-    batch_size=config.BATCH_SIZE,
+    #batch_size=config.BATCH_SIZE,
     epochs=config.EPOCHS,
     callbacks=[TrainMonitor()],
-    steps_per_epoch=config.STEPS_PER_EPOCH,
+   # steps_per_epoch=config.STEPS_PER_EPOCH,
 )
 
 
