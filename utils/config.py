@@ -13,9 +13,9 @@ N_C = 16
 
 main_dir = "C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow"
 
-IMAGE_PATH = main_dir + "/output/image"
-VIDEO_PATH = main_dir + "/output/image"
-OUTPUT_VIDEO_PATH = main_dir + "/output/image"
+OUTPUT_IMAGE_PATH = main_dir + "/output/images"
+
+OUTPUT_VIDEO_PATH = main_dir + "/output/video"
 
 FPS = 30
 QUALITY = 7
@@ -27,8 +27,7 @@ DATASET_PATH = main_dir + "/dataset"
 
 NEAR = 2
 FAR = 6
-SKIP_LAYER = 4
-DENSE_UNITS = 64
+
 
 BATCH_SIZE = 2
 NUM_SAMPLES = 16
@@ -38,7 +37,5 @@ STEPS_PER_EPOCH = 20
 VALIDATION_STEPS = 20
 EPOCHS = 10
 
-COARSE_PATH = main_dir + "/output"
-FINE_PATH = main_dir + "/output"
 
-#VALIDATION_STEPS = TRAIN_EXAMPLE // BATCH_SIZE
+

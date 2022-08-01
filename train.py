@@ -5,23 +5,25 @@
 import os
 from tensorflow.keras.losses import MeanSquaredError
 from tensorflow.keras.optimizers import Adam
-from nerfutils import config
-from nerfutils.nerf_trainer import NeRF
-from nerfutils.nerf import get_nerf_model
-from nerfutils.encoder import encode_position
-from nerfutils.data import get_rays
-from nerfutils.data import GetImages
-from nerfutils.data import get_image_c2w
-from nerfutils.data import read_json
-from nerfutils.data import map_fn
+from utils import config
+from utils.nerf_trainer import NeRF
+from utils.nerf import get_nerf_model
+from utils.encoder import encode_position
+from utils.data import get_rays
+from utils.data import GetImages
+from utils.data import get_image_c2w
+from utils.data import read_json
+from utils.data import map_fn
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow import keras
-from nerfutils.nerf import render_rgb_depth
+from utils.nerf import render_rgb_depth
 import glob
 import imageio
 from tqdm import tqdm
 import numpy as np
+
+from utils.train_monitor import get_train_monitor
 tf.random.set_seed(42)
 from PIL import Image
 import glob
@@ -98,39 +100,10 @@ testDs = (
     .prefetch(config.AUTO)
 )
 
-test_imgs, test_rays = next(iter(trainDs))
-test_rays_flat, test_t_vals = test_rays
 
-loss_list = []
+trainMonitorCallback = get_train_monitor(testDs, render_rgb_depth = render_rgb_depth, OUTPUT_IMAGE_PATH = config.OUTPUT_IMAGE_PATH)
 
-class TrainMonitor(keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, logs=None):
-        loss = logs["loss"]
-        loss_list.append(loss)
-        test_recons_images, depth_maps = render_rgb_depth(
-            model=self.model.nerf_model,
-            rays_flat=test_rays_flat,
-            t_vals=test_t_vals,
-            rand=True,
-            train=False,
-        )
-
-        # Plot the rgb, depth and the loss plot.
-        fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(20, 5))
-        ax[0].imshow(keras.preprocessing.image.array_to_img(test_recons_images[0]))
-        ax[0].set_title(f"Predicted Image: {epoch:03d}")
-
-        ax[1].imshow(keras.preprocessing.image.array_to_img(depth_maps[0, ..., None]))
-        ax[1].set_title(f"Depth Map: {epoch:03d}")
-
-        ax[2].plot(loss_list)
-        ax[2].set_xticks(np.arange(0, config.EPOCHS + 1, 5.0))
-        ax[2].set_title(f"Loss Plot: {epoch:03d}")
-
-        fig.savefig(f"images/{epoch:03d}.png")
-        plt.show()
-        plt.close()
-        
+   
         
 num_pos = config.IMAGE_HEIGHT * config.IMAGE_WIDTH * config.NUM_SAMPLES
 nerf_model = get_nerf_model(num_layers=8, num_pos=num_pos)
@@ -144,15 +117,17 @@ model.compile(
 if not os.path.exists("images"):
     os.makedirs("images")
 
+#%%
 model.fit(
     trainDs,
     validation_data=valDs,
     #batch_size=config.BATCH_SIZE,
     epochs=config.EPOCHS,
-    callbacks=[TrainMonitor()],
+    callbacks=[trainMonitorCallback],
    # steps_per_epoch=config.STEPS_PER_EPOCH,
 )
 
+#%%
 
 def create_gif(path_to_images, name_gif):
     filenames = glob.glob(path_to_images)

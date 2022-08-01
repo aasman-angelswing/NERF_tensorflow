@@ -7,7 +7,7 @@ from tensorflow.keras.layers import concatenate
 from tensorflow.keras import Input
 from tensorflow.keras import Model
 from tensorflow.keras import layers
-from nerfutils import config
+from utils import config
 
 
 def get_nerf_model(num_layers, num_pos):

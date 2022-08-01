@@ -1,6 +1,6 @@
 # import the necessary packages
 import tensorflow as tf
-from nerfutils import config
+from utils import config
 
 def encode_position(x):
     """Encodes the position into its corresponding Fourier feature.

@@ -2,7 +2,7 @@
 from tensorflow.keras.metrics import Mean
 import tensorflow as tf
 from tensorflow import keras
-from nerfutils.nerf import render_rgb_depth
+from utils.nerf import render_rgb_depth
 
 class NeRF(keras.Model):
     def __init__(self, nerf_model):

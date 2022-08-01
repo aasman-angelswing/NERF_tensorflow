@@ -7,8 +7,8 @@ from tensorflow.image import convert_image_dtype
 from tensorflow.image import resize
 from tensorflow import reshape
 import json
-from nerfutils.encoder import encode_position
-from nerfutils import config
+from utils.encoder import encode_position
+from utils import config
 import numpy as np
 
 
