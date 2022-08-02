@@ -126,9 +126,9 @@ model.fit(
     callbacks=[trainMonitorCallback],
    # steps_per_epoch=config.STEPS_PER_EPOCH,
 )
-
+# model.nerf_model.save(config.MODEL_PATH)
 #%%
-
+model.nerf_model.save(config.MODEL_PATH)
 def create_gif(path_to_images, name_gif):
     filenames = glob.glob(path_to_images)
     filenames = sorted(filenames)
@@ -142,3 +142,5 @@ def create_gif(path_to_images, name_gif):
 create_gif("images/*.png", "training.gif")
 
 
+
+# %%

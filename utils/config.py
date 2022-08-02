@@ -37,5 +37,5 @@ STEPS_PER_EPOCH = 20
 VALIDATION_STEPS = 20
 EPOCHS = 10
 
-
+MODEL_PATH = main_dir + "/output/assets"
 
