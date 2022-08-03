@@ -1,15 +1,10 @@
 # import the necessary packages
 from numpy import asarray
 import tensorflow as tf
-from tensorflow.io import read_file
-from tensorflow.image import decode_jpeg
-from tensorflow.image import convert_image_dtype
-from tensorflow.image import resize
 from tensorflow import reshape
 import json
 from utils.encoder import encode_position
 from utils import config
-import numpy as np
 
 
 def read_json(jsonPath):
@@ -41,30 +36,26 @@ def get_image_c2w(jsonData, datasetPath):
     return (imagePaths, c2ws)
 
 
-
-
 def GetImages(imagePath):
     images = []
     for imagePath in imagePath:
-        image = read_file(imagePath)
-            # decode the image string
-        image = decode_jpeg(image, 3)
-            # convert the image dtype from uint8 to float32
-        image = convert_image_dtype(image, dtype=tf.float32)
-            # resize the image to the height and width in config
-        image = resize(image, (200, 200))
+        image = tf.io.read_file(imagePath)
+        # decode the image string
+        image = tf.image.decode_jpeg(image, 3)
+        # convert the image dtype from uint8 to float32
+        image = tf.image.convert_image_dtype(image, dtype=tf.float32)
+        # resize the image to the height and width in config
+        image = tf.image.resize(image, (200, 200))
         image = reshape(image, (200, 200, 3))
         image = asarray(image)
         images.append(image)
-        
-        
-    
+
     images = asarray(images)        # return the image
     return images
 
 
 def get_rays(height, width, focal, pose):
-  
+
     # Build a meshgrid for the rays.
     i, j = tf.meshgrid(
         tf.range(width, dtype=tf.float32),
@@ -79,11 +70,12 @@ def get_rays(height, width, focal, pose):
     transformed_j = (j - height * 0.5) / focal
 
     # Create the direction unit vectors.
-    directions = tf.stack([transformed_i, -transformed_j, -tf.ones_like(i)], axis=-1)
+    directions = tf.stack(
+        [transformed_i, -transformed_j, -tf.ones_like(i)], axis=-1)
 
     # Get the camera matrix.
     camera_matrix = pose[:3, :3]
-    print(camera_matrix.shape)
+    
     height_width_focal = pose[:3, -1]
 
     # Get origins and directions for the rays.
@@ -95,8 +87,9 @@ def get_rays(height, width, focal, pose):
     # Return the origins and directions.
     return (ray_origins, ray_directions)
 
+
 def render_flat_rays(ray_origins, ray_directions, near, far, num_samples, rand=False):
-  
+
     # Compute 3D query points.
     # Equation: r(t) = o+td -> Building the "t" here.
     t_vals = tf.linspace(near, far, num_samples)
@@ -106,7 +99,6 @@ def render_flat_rays(ray_origins, ray_directions, near, far, num_samples, rand=F
         shape = list(ray_origins.shape[:-1]) + [num_samples]
         noise = tf.random.uniform(shape=shape) * (far - near) / num_samples
         t_vals = t_vals + noise
-
     # Equation: r(t) = o + td -> Building the "r" here.
     rays = ray_origins[..., None, :] + (
         ray_directions[..., None, :] * t_vals[..., None]
@@ -115,9 +107,11 @@ def render_flat_rays(ray_origins, ray_directions, near, far, num_samples, rand=F
     rays_flat = encode_position(rays_flat)
     return (rays_flat, t_vals)
 
+
 def map_fn(pose):
-    
-    (ray_origins, ray_directions) = get_rays(height=config.IMAGE_HEIGHT, width=config.IMAGE_WIDTH, focal=22, pose=pose)
+
+    (ray_origins, ray_directions) = get_rays(
+        height=config.IMAGE_HEIGHT, width=config.IMAGE_WIDTH, focal=22, pose=pose)
     (rays_flat, t_vals) = render_flat_rays(
         ray_origins=ray_origins,
         ray_directions=ray_directions,

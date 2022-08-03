@@ -1,10 +1,9 @@
 # import the necessary packages
-from tensorflow.keras.metrics import Mean
 import tensorflow as tf
-from tensorflow import keras
 from utils.nerf import render_rgb_depth
 
-class NeRF(keras.Model):
+
+class NeRF(tf.keras.Model):
     def __init__(self, nerf_model):
         super().__init__()
         self.nerf_model = nerf_model
@@ -13,8 +12,8 @@ class NeRF(keras.Model):
         super().compile()
         self.optimizer = optimizer
         self.loss_fn = loss_fn
-        self.loss_tracker = keras.metrics.Mean(name="loss")
-        self.psnr_metric = keras.metrics.Mean(name="psnr")
+        self.loss_tracker = tf.keras.metrics.Mean(name="loss")
+        self.psnr_metric = tf.keras.metrics.Mean(name="psnr")
 
     def train_step(self, inputs):
         # Get the images and the rays.
@@ -67,4 +66,3 @@ class NeRF(keras.Model):
     @property
     def metrics(self):
         return [self.loss_tracker, self.psnr_metric]
-
