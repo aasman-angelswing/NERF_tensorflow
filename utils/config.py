@@ -29,8 +29,8 @@ VAL_JSON = main_dir + "/dataset/transforms_val.json"
 TEST_JSON = main_dir + "/dataset/transforms_test.json"
 DATASET_PATH = main_dir + "/dataset"
 
-NEAR = 2
-FAR = 6
+NEAR = 2.0
+FAR = 6.0
 
 
 BATCH_SIZE = 2
