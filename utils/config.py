@@ -9,15 +9,13 @@ AUTO = tf.data.AUTOTUNE
 
 L_XYZ = 4
 L_DIR = 4
-N_F = 16
-N_C = 16
+
 
 main_dir = "/home/ec2-user/SageMaker/NERF_tensorflow"
 
 OUTPUT_IMAGE_PATH = main_dir + "/output/images"
 OUTPUT_INFERENCE_PATH = main_dir + "/output/inferences"
 OUTPUT_VIDEO_PATH = "/output/videos"
-OUTPUT_GIF_PATH = main_dir + "/output"
 MODEL_PATH = main_dir + "/output"
 
 
@@ -39,8 +37,8 @@ BATCH_SIZE = 2
 NUM_SAMPLES = 16
 POS_ENCODE_DIMS = 16
 
-STEPS_PER_EPOCH = 20
-VALIDATION_STEPS = 20
+# STEPS_PER_EPOCH = 20
+# VALIDATION_STEPS = 20
 EPOCHS = 10
 
 
@@ -49,4 +47,6 @@ def create_dir():
         os.makedirs(OUTPUT_INFERENCE_PATH)
     if not os.path.exists(OUTPUT_IMAGE_PATH):
         os.makedirs(OUTPUT_IMAGE_PATH)
+    if not os.path.exists(OUTPUT_VIDEO_PATH):
+        os.makedirs(OUTPUT_VIDEO_PATH)
 

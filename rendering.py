@@ -7,6 +7,7 @@ from utils.data import get_rays
 from utils.data import render_flat_rays
 from utils.nerf import render_rgb_depth
 
+
 def render_videos(nerf_model):
     
     def get_translation_t(t):
@@ -68,7 +69,7 @@ def render_videos(nerf_model):
         ray_oris = tf.cast(ray_oris,tf.float32)
         ray_dirs = tf.cast(ray_dirs,tf.float32)
         rays_flat, t_vals = render_flat_rays(
-            ray_oris, ray_dirs, near=2.0, far=6.0, num_samples=config.NUM_SAMPLES, rand=False
+            ray_oris, ray_dirs, near=config.NEAR, far=config.FAR, num_samples=config.NUM_SAMPLES, rand=False
         )
 
         if index % config.BATCH_SIZE == 0 and index > 0:
@@ -89,4 +90,4 @@ def render_videos(nerf_model):
             batch_flat.append(rays_flat)
             batch_t.append(t_vals)
 
-    imageio.mimwrite(config.OUPUT_VIDEO_PATH + "/video.gif", rgb_frames, fps=30)
+    imageio.mimwrite(config.OUTPUT_VIDEO_PATH + "/video.gif", rgb_frames, fps=30)

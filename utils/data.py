@@ -115,8 +115,8 @@ def map_fn(pose):
     (rays_flat, t_vals) = render_flat_rays(
         ray_origins=ray_origins,
         ray_directions=ray_directions,
-        near=2.0,
-        far=6.0,
+        near=config.NEAR,
+        far=config.FAR,
         num_samples=config.NUM_SAMPLES,
         rand=True,
     )
