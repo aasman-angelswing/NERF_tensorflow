@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 
 SAMPLE_THETA_POINTS = 10
 
@@ -8,14 +9,18 @@ AUTO = tf.data.AUTOTUNE
 
 L_XYZ = 4
 L_DIR = 4
-N_F = 8
-N_C = 8
 
-main_dir = "/home/aasman/angelswing/NERF_tensorflow"
 
-IMAGE_PATH = main_dir + "/output/image"
-VIDEO_PATH = main_dir + "/output/image"
-OUTPUT_VIDEO_PATH = main_dir + "/output/image"
+main_dir = "/home/ec2-user/SageMaker/NERF_tensorflow"
+
+OUTPUT_IMAGE_PATH = main_dir + "/output/images"
+OUTPUT_INFERENCE_PATH = main_dir + "/output/inferences"
+OUTPUT_VIDEO_PATH = "/output/videos"
+MODEL_PATH = main_dir + "/output"
+
+
+
+
 FPS = 30
 QUALITY = 7
 
@@ -24,19 +29,24 @@ VAL_JSON = main_dir + "/dataset/transforms_val.json"
 TEST_JSON = main_dir + "/dataset/transforms_test.json"
 DATASET_PATH = main_dir + "/dataset"
 
-NEAR = 2
-FAR = 6
+NEAR = 2.0
+FAR = 6.0
 
-SKIP_LAYER = 4
-DENSE_UNITS = 64
 
 BATCH_SIZE = 2
-NUM_SAMPLES = 32
+NUM_SAMPLES = 16
 POS_ENCODE_DIMS = 16
 
-STEPS_PER_EPOCH =  50
-VALIDATION_STEPS = 2
+# STEPS_PER_EPOCH = 20
+# VALIDATION_STEPS = 20
 EPOCHS = 10
 
-COARSE_PATH = main_dir + "/output"
-FINE_PATH = main_dir + "/output"
+
+def create_dir():
+    if not os.path.exists(OUTPUT_INFERENCE_PATH):
+        os.makedirs(OUTPUT_INFERENCE_PATH)
+    if not os.path.exists(OUTPUT_IMAGE_PATH):
+        os.makedirs(OUTPUT_IMAGE_PATH)
+    if not os.path.exists(OUTPUT_VIDEO_PATH):
+        os.makedirs(OUTPUT_VIDEO_PATH)
+

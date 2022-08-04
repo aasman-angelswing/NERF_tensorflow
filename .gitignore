@@ -1,5 +1,8 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+utils/__pycache__
+.ipynb_checkpoints
+.vscide
 *.py[cod]
 *$py.class
 
@@ -8,6 +11,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+# nerf/
 build/
 develop-eggs/
 dist/

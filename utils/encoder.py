@@ -1,18 +1,19 @@
 # import the necessary packages
 import tensorflow as tf
+from utils import config
 
 
-def pos_embedding(p, L):
-    # build the list of positional encodings
-    posVector = [p]
-    # iterate over the number of dimensions in time
-    for i in range(L):
-        # insert sine and cosine of the product of current dimension
-        # and the position vector
-        posVector.append(tf.sin((2.0 ** i) * p))
-        posVector.append(tf.cos((2.0 ** i) * p))
+def encode_position(x):
+    """Encodes the position into its corresponding Fourier feature.
 
-    # concatenate the positional encodings into a positional vector
-    posVector = tf.concat(posVector, axis=-1)
-    # return the positional encoding vector
-    return posVector
+    Args:
+        x: The input coordinate.
+
+    Returns:
+        Fourier features tensors of the position.
+    """
+    positions = [x]
+    for i in range(config.POS_ENCODE_DIMS):
+        for fn in [tf.sin, tf.cos]:
+            positions.append(fn(2.0**i * x))
+    return tf.concat(positions, axis=-1)
