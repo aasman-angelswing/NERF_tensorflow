@@ -23,8 +23,8 @@ ournerf.ipynb
 ```
 
 ## Results
-
- ![img](https://github.com/aasman-angelswing/NERF_tensorflow/blob/357f09950d9676795635904885abfda643c2c009/output/videos/video.gif)
+* Results after 10 epoch
+![img](https://github.com/aasman-angelswing/NERF_tensorflow/blob/357f09950d9676795635904885abfda643c2c009/output/videos/video.gif)
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
