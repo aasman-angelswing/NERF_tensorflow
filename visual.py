@@ -1,23 +1,5 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import imageio
-import glob
-from tqdm import tqdm
-import numpy as np
-from utils import config
-from utils.data import get_rays
-from utils.data import render_flat_rays
-from utils.nerf import render_rgb_depth
-
-def create_gif(path_to_images, name_gif):
-    filenames = glob.glob(path_to_images)
-    filenames = sorted(filenames)
-    images = []
-    for filename in tqdm(filenames):
-        images.append(imageio.imread(filename))
-    kargs = {"duration": 0.25}
-    imageio.mimsave(name_gif, images, "GIF", **kargs)
-
 
 def inference(nerf_model, render_rgb_depth, testDs, OUTPUT_INFERENCE_PATH):
 

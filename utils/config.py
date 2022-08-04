@@ -16,8 +16,10 @@ main_dir = "/home/ec2-user/SageMaker/NERF_tensorflow"
 
 OUTPUT_IMAGE_PATH = main_dir + "/output/images"
 OUTPUT_INFERENCE_PATH = main_dir + "/output/inferences"
-OUTPUT_VIDEO_PATH = "rgb_video.mp4"
+OUTPUT_VIDEO_PATH = "/output/videos"
 OUTPUT_GIF_PATH = main_dir + "/output"
+MODEL_PATH = main_dir + "/output"
+
 
 
 
@@ -47,5 +49,4 @@ def create_dir():
         os.makedirs(OUTPUT_INFERENCE_PATH)
     if not os.path.exists(OUTPUT_IMAGE_PATH):
         os.makedirs(OUTPUT_IMAGE_PATH)
-    if not os.path.exists(OUTPUT_VIDEO_PATH):
-        os.makedirs(OUTPUT_VIDEO_PATH)
+
