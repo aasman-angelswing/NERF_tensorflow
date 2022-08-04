@@ -24,9 +24,9 @@ ournerf.ipynb
 
 ## Results
 ### Results after 10 epoch
-![img](https://github.com/aasman-angelswing/NERF_tensorflow/blob/357f09950d9676795635904885abfda643c2c009/output/videos/video.gif)
+![img](https://github.com/aasman-angelswing/NERF_tensorflow/blob/main/output/videos/video.gif)
 ### Results after 20 epoch
-![img](https://github.com/aasman-angelswing/NERF_tensorflow/blob/fedc8a97035aa366655c7b11240d2e89e0176271/output/videos/video20.gif)
+![img](https://github.com/aasman-angelswing/NERF_tensorflow/blob/main/output/videos/video20.gif)
 
 
 
