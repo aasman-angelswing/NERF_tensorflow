@@ -1,7 +1,5 @@
-import matplotlib.pyplot as plt
 import tensorflow as tf
 import imageio
-import glob
 from tqdm import tqdm
 import numpy as np
 from utils import config
@@ -9,8 +7,7 @@ from utils.data import get_rays
 from utils.data import render_flat_rays
 from utils.nerf import render_rgb_depth
 
-
-def videos(nerf_model):
+def render_videos(nerf_model):
     
     def get_translation_t(t):
         """Get the translation matrix for movement in t."""
@@ -93,4 +90,4 @@ def videos(nerf_model):
             batch_t.append(t_vals)
     
     rgb_video = config.OUTPUT_VIDEO_PATH
-    imageio.mimwrite("video.gif", rgb_frames, fps=30)
+    imageio.mimwrite(f"{rgb_video}\video.gif", rgb_frames, fps=30)

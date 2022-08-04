@@ -6,8 +6,8 @@ from utils.nerf import get_nerf_model, render_rgb_depth
 from utils.data import *
 from utils.config import create_dir
 from utils.train_monitor import get_train_monitor
-from video import videos
-from visual import inference
+from visual import inference, create_gif
+from rendering import render_videos
 
 from tensorflow import keras
 
@@ -115,11 +115,12 @@ model.fit(
 model.nerf_model.save('C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow/output',save_format='tf')
 '''
 #%%
-model = tf.keras.models.load_model('C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow/output',compile = False)
+model = tf.keras.models.load_model(config.MODEL_PATH ,compile = False)
+
 #%%
 inference(nerf_model=model, render_rgb_depth=render_rgb_depth,
           testDs=testDs, OUTPUT_INFERENCE_PATH=config.OUTPUT_INFERENCE_PATH)
 
 # %%
-videos(nerf_model=model)
+render_videos(nerf_model=model)
 # %%
