@@ -12,7 +12,7 @@ L_DIR = 4
 N_F = 16
 N_C = 16
 
-main_dir = "C:/Users/lihsu/OneDrive/Desktop/NERF_tensorflow"
+main_dir = "/home/ec2-user/SageMaker/NERF_tensorflow"
 
 OUTPUT_IMAGE_PATH = main_dir + "/output/images"
 OUTPUT_INFERENCE_PATH = main_dir + "/output/inferences"
