@@ -65,7 +65,7 @@ def render_videos(nerf_model):
         # c2w = tf.cast(c2w,tf.int32)
 
         print("2")
-        ray_oris, ray_dirs = get_rays(height=config.IMAGE_HEIGHT, width=config.IMAGE_WIDTH, focal= 50, pose=c2w)
+        ray_oris, ray_dirs = get_rays(height=config.IMAGE_HEIGHT, width=config.IMAGE_WIDTH, focal= config.FOCAL_LENGTH, pose=c2w)
         ray_oris = tf.cast(ray_oris,tf.float32)
         ray_dirs = tf.cast(ray_dirs,tf.float32)
         rays_flat, t_vals = render_flat_rays(
