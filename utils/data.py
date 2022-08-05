@@ -111,7 +111,7 @@ def render_flat_rays(ray_origins, ray_directions, near, far, num_samples, rand=F
 def map_fn(pose):
 
     (ray_origins, ray_directions) = get_rays(
-        height=config.IMAGE_HEIGHT, width=config.IMAGE_WIDTH, focal=22, pose=pose)
+        height=config.IMAGE_HEIGHT, width=config.IMAGE_WIDTH, focal=config.FOCAL_LENGTH, pose=pose)
     (rays_flat, t_vals) = render_flat_rays(
         ray_origins=ray_origins,
         ray_directions=ray_directions,

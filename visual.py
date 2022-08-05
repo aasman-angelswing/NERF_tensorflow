@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
-def inference(nerf_model, render_rgb_depth, testDs, OUTPUT_INFERENCE_PATH):
+def inference(nerf_model, render_rgb_depth, test_dataset, OUTPUT_INFERENCE_PATH):
 
     # Get the trained NeRF model and infer.
-    test_imgs, test_rays = next(iter(testDs))
+    test_imgs, test_rays = next(iter(test_dataset))
     test_rays_flat, test_t_vals = test_rays
     test_recons_images, depth_maps = render_rgb_depth(
         model=nerf_model,
@@ -16,7 +16,8 @@ def inference(nerf_model, render_rgb_depth, testDs, OUTPUT_INFERENCE_PATH):
 
     # Create subplots.
     fig, axes = plt.subplots(nrows=5, ncols=3, figsize=(10, 20))
-    namecount = 0
+    NAME_COUNT = 0
+    
     for ax, ori_img, recons_img, depth_map in zip(
         axes, test_imgs, test_recons_images, depth_maps
     ):
@@ -30,6 +31,6 @@ def inference(nerf_model, render_rgb_depth, testDs, OUTPUT_INFERENCE_PATH):
             tf.keras.preprocessing.image.array_to_img(depth_map[..., None]), cmap="inferno"
         )
         ax[2].set_title("Depth Map")
-        fig.savefig(f"{OUTPUT_INFERENCE_PATH}/{namecount}.png")
-        namecount += namecount
+        fig.savefig(f"{OUTPUT_INFERENCE_PATH}/{NAME_COUNT}.png")
+        NAME_COUNT += NAME_COUNT
         

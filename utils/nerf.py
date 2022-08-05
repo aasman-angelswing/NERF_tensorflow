@@ -8,7 +8,8 @@ def get_nerf_model(num_layers, num_pos):
         shape=(num_pos, 2 * 3 * config.POS_ENCODE_DIMS + 3))
     x = inputs
     for i in range(num_layers):
-        x = tf.keras.layers.Dense(units=64, activation="relu")(x)
+        x = tf.keras.layers.Dense(
+            units=config.DENSE_UNITS, activation="relu")(x)
         if i % 4 == 0 and i > 0:
             # Inject residual connection.
             x = tf.keras.layers.concatenate([x, inputs], axis=-1)

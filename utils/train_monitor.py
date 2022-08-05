@@ -4,9 +4,9 @@ import numpy as np
 from utils import config
 
 
-def get_train_monitor(testDs, render_rgb_depth, OUTPUT_IMAGE_PATH):
+def get_train_monitor(test_dataset, render_rgb_depth, OUTPUT_IMAGE_PATH):
     
-    _, test_rays = next(iter(testDs))
+    _, test_rays = next(iter(test_dataset))
     test_rays_flat, test_t_vals = test_rays
 
     loss_list = []
