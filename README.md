@@ -27,6 +27,8 @@ ournerf.ipynb
 ![img](https://github.com/aasman-angelswing/NERF_tensorflow/blob/main/output/videos/video.gif)
 ### Results after 20 epoch
 ![img](https://github.com/aasman-angelswing/NERF_tensorflow/blob/main/output/videos/video20.gif)
+### Results after 100 epoch
+![img](https://github.com/aasman-angelswing/NERF_tensorflow/blob/main/output/videos/video100.gif)
 
 
 
