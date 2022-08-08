@@ -45,8 +45,8 @@ def GetImages(imagePath):
         # convert the image dtype from uint8 to float32
         image = tf.image.convert_image_dtype(image, dtype=tf.float32)
         # resize the image to the height and width in config
-        image = tf.image.resize(image, (200, 200))
-        image = reshape(image, (200, 200, 3))
+        image = tf.image.resize(image, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT))
+        image = reshape(image, (config.IMAGE_WIDTH, config.IMAGE_HEIGHT, 3))
         image = asarray(image)
         images.append(image)
 
@@ -75,7 +75,7 @@ def get_rays(height, width, focal, pose):
 
     # Get the camera matrix.
     camera_matrix = pose[:3, :3]
-    
+
     height_width_focal = pose[:3, -1]
 
     # Get origins and directions for the rays.
