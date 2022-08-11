@@ -17,6 +17,7 @@ def read_json(jsonPath):
     return data
 
 
+
 def get_image_c2w(jsonData, datasetPath):
     # define a list to store the image paths
     imagePaths = []
@@ -27,13 +28,14 @@ def get_image_c2w(jsonData, datasetPath):
     for frame in jsonData["frames"]:
         # grab the image file name
         imagePath = frame["file_path"]
-        imagePath = imagePath.replace(".", datasetPath)
-        imagePaths.append(f"{imagePath}.png")
+        imagePath = imagePath.replace("./", datasetPath)
+        imagePaths.append(f"{imagePath}")
         # grab the camera2world matrix
         c2ws.append(frame["transform_matrix"])
 
     # return the image file names and the camera2world matrices
     return (imagePaths, c2ws)
+
 
 
 def GetImages(imagePath):

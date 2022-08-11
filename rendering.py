@@ -59,7 +59,7 @@ def render_videos(nerf_model):
     batch_t = []
    
     # Iterate over different theta value and generate scenes.
-    for index, theta in tqdm(enumerate(np.linspace(0.0, 360.0, 120, endpoint=False))):
+    for index, theta in tqdm(enumerate(np.linspace(300.0, 60.0, 60, endpoint=False))):
         # Get the camera to world matrix.
         c2w = pose_spherical(theta, -30.0, 4.0)
         # c2w = tf.cast(c2w,tf.int32)

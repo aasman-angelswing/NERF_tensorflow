@@ -12,6 +12,9 @@ L_XYZ = 4
 L_DIR = 4
 
 main_dir = "/home/ec2-user/SageMaker/NERF_tensorflow"
+# main_dir = "/home/aasman/angelswing/NERF_tensorflow"
+
+
 
 OUTPUT_IMAGE_PATH = main_dir + "/output/images"
 OUTPUT_INFERENCE_PATH = main_dir + "/output/inferences"
@@ -21,22 +24,22 @@ MODEL_PATH = main_dir + "/output"
 FPS = 30
 QUALITY = 7
 
-TRAIN_JSON = main_dir + "/dataset/transforms_train.json"
+TRAIN_JSON = main_dir + "/dataset/room/transforms.json"
 VAL_JSON = main_dir + "/dataset/transforms_val.json"
 TEST_JSON = main_dir + "/dataset/transforms_test.json"
-DATASET_PATH = main_dir + "/dataset"
+DATASET_PATH = main_dir + "/dataset/room/"
 
 NEAR = 2.0
 FAR = 6.0
 
 BATCH_SIZE = 2
-NUM_SAMPLES = 16
+NUM_SAMPLES = 32
 POS_ENCODE_DIMS = 16
-DENSE_UNITS = 64
+DENSE_UNITS = 264
 
 # STEPS_PER_EPOCH = 20
 # VALIDATION_STEPS = 20
-EPOCHS = 10
+EPOCHS = 5
 
 
 def create_dir():
