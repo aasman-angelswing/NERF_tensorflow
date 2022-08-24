@@ -6,7 +6,7 @@ from utils import config
 from utils.data import get_rays
 from utils.data import render_flat_rays
 from utils.nerf import render_rgb_depth
-
+import matplotlib.pyplot as plt
 
 def render_videos(nerf_model):
     
@@ -59,12 +59,12 @@ def render_videos(nerf_model):
     batch_t = []
    
     # Iterate over different theta value and generate scenes.
-    for index, theta in tqdm(enumerate(np.linspace(300.0, 60.0, 60, endpoint=False))):
+    for index, theta in tqdm(enumerate(np.linspace(80.0, 100.0, 60, endpoint=False))):
         # Get the camera to world matrix.
-        c2w = pose_spherical(theta, -30.0, 4.0)
+        c2w = pose_spherical(theta, -10.0, 5.0)
         # c2w = tf.cast(c2w,tf.int32)
 
-        print("2")
+ 
         ray_oris, ray_dirs = get_rays(height=config.IMAGE_HEIGHT, width=config.IMAGE_WIDTH, focal= config.FOCAL_LENGTH, pose=c2w)
         ray_oris = tf.cast(ray_oris,tf.float32)
         ray_dirs = tf.cast(ray_dirs,tf.float32)
@@ -90,4 +90,5 @@ def render_videos(nerf_model):
             batch_flat.append(rays_flat)
             batch_t.append(t_vals)
 
-    imageio.mimwrite(config.OUTPUT_VIDEO_PATH + "/video.gif", rgb_frames, fps=30)
+    imageio.mimwrite(config.OUTPUT_VIDEO_PATH + "/video.mp4", rgb_frames, fps=30)
+    

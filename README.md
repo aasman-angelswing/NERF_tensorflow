@@ -19,6 +19,11 @@ Kernel : conda_tensorflow2_p38
 
 # run
 ournerf.ipynb
+or
+
+python3 train.py # for training and saving model
+and 
+python3 generate_video.py # for generating video 
 
 ```
 

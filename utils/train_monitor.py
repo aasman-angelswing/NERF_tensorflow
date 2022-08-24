@@ -5,12 +5,12 @@ from utils import config
 
 
 def get_train_monitor(test_dataset, render_rgb_depth, OUTPUT_IMAGE_PATH):
-    
+
     _, test_rays = next(iter(test_dataset))
     test_rays_flat, test_t_vals = test_rays
 
     loss_list = []
-    
+
     class TrainMonitor(tf.keras.callbacks.Callback):
         def on_epoch_end(self, epoch, logs=None):
             loss = logs["loss"]
@@ -25,10 +25,12 @@ def get_train_monitor(test_dataset, render_rgb_depth, OUTPUT_IMAGE_PATH):
 
             # Plot the rgb, depth and the loss plot.
             fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(20, 5))
-            ax[0].imshow(tf.keras.preprocessing.image.array_to_img(test_recons_images[0]))
+            ax[0].imshow(tf.keras.preprocessing.image.array_to_img(
+                test_recons_images[0]))
             ax[0].set_title(f"Predicted Image: {epoch:03d}")
 
-            ax[1].imshow(tf.keras.preprocessing.image.array_to_img(depth_maps[0, ..., None]))
+            ax[1].imshow(tf.keras.preprocessing.image.array_to_img(
+                depth_maps[0, ..., None]))
             ax[1].set_title(f"Depth Map: {epoch:03d}")
 
             ax[2].plot(loss_list)
@@ -36,9 +38,7 @@ def get_train_monitor(test_dataset, render_rgb_depth, OUTPUT_IMAGE_PATH):
             ax[2].set_title(f"Loss Plot: {epoch:03d}")
 
             fig.savefig(f"{OUTPUT_IMAGE_PATH}/{epoch:03d}.png")
-         
 
     trainMonitor = TrainMonitor()
     # return the train monitor
     return trainMonitor
-

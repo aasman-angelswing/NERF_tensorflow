@@ -4,9 +4,15 @@ import os
 SAMPLE_THETA_POINTS = 10
 FOCAL_LENGTH = 50
 
-IMAGE_WIDTH = 200
-IMAGE_HEIGHT = 200
+IMAGE_WIDTH = 150
+IMAGE_HEIGHT = 150
 AUTO = tf.data.AUTOTUNE
+
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    DEVICE = '/GPU:0'
+else:
+    DEVICE = '/CPU:0'
 
 L_XYZ = 4
 L_DIR = 4
@@ -15,10 +21,9 @@ main_dir = "/home/ec2-user/SageMaker/NERF_tensorflow"
 # main_dir = "/home/aasman/angelswing/NERF_tensorflow"
 
 
-
 OUTPUT_IMAGE_PATH = main_dir + "/output/images"
 OUTPUT_INFERENCE_PATH = main_dir + "/output/inferences"
-OUTPUT_VIDEO_PATH = "/output/videos"
+OUTPUT_VIDEO_PATH = main_dir + "/output/videos"
 MODEL_PATH = main_dir + "/output"
 
 FPS = 30
@@ -29,17 +34,21 @@ VAL_JSON = main_dir + "/dataset/transforms_val.json"
 TEST_JSON = main_dir + "/dataset/transforms_test.json"
 DATASET_PATH = main_dir + "/dataset/room/"
 
-NEAR = 2.0
-FAR = 6.0
+nonsync = True
 
-BATCH_SIZE = 2
+if nonsync:
+    NEAR = 0.0
+    FAR = 1.0
+else:
+    NEAR = 2.0
+    FAR = 6.0
+
+BATCH_SIZE = 1
 NUM_SAMPLES = 32
 POS_ENCODE_DIMS = 16
-DENSE_UNITS = 264
+DENSE_UNITS = 256
 
-# STEPS_PER_EPOCH = 20
-# VALIDATION_STEPS = 20
-EPOCHS = 5
+EPOCHS = 1
 
 
 def create_dir():
